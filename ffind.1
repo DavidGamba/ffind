@@ -1,0 +1,206 @@
+'\" t
+.\"     Title: ffind
+.\"    Author: David Gamba, davidgamba at gmail.com
+.\" Generator: DocBook XSL Stylesheets v1.76.1 <http://docbook.sf.net/>
+.\"      Date: 04/18/2014
+.\"    Manual: \ \&
+.\"    Source: \ \&
+.\"  Language: English
+.\"
+.TH "FFIND" "1" "04/18/2014" "\ \&" "\ \&"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+ffind \- Fast Regex Find, faster common Find searches using the power of Perl\*(Aqs Regex engine
+.SH "SYNOPSIS"
+.PP
+# Search for files using regex
+.RS 4
+
+\fBffind\fR
+[\fIdir\fR]
+\fIfile_pattern\fR
+[ [\fB\-f\fR] | [\fB\-d\fR] | [\fB\-\-type\fR
+\fIf\fR|\fId\fR] ] [\fB\-c\fR|\fB\-\-case\fR] [\fB\-\-full\fR|\fB\-\-full\-path\fR] [\fB\-\-hidden\fR] [\fB\-\-color\fR
+\fInever\fR|\fIauto\fR|\fIalways\fR]
+.RE
+.PP
+# Show version number
+.RS 4
+
+\fBffind\fR
+\fB\-\-version\fR
+.RE
+.PP
+# show synopsis only
+.RS 4
+
+\fBffind\fR
+\fB\-h\fR
+.RE
+.PP
+# show man page
+.RS 4
+
+\fBffind\fR
+\fB\-\-help\fR
+.RE
+.SH "DESCRIPTION"
+.sp
+This command focuses on the most common find searches\&. They are optimized for typing speed as not to interrupt your thought process\&.
+.sp
+Instead of typing "find \&. \-iname \fI\fBpattern\fR\fR" or "find \-regextype subpar_type \-regex \*(Aq^\&.*?pattern\&.*$\*(Aq" you can simply type "ffind pattern"\&.
+.sp
+More obscure searches are probably better suited to find, however find\(cqs regex engine is subpar compared to Perl\(cqs so\&...
+.sp
+This command is also only intended to search for files, once you find them, pipe the output if you want to excecute a command on them\&.
+.SH "OPTIONS"
+.PP
+\fIdir\fR
+.RS 4
+Directory to search from\&. Defaults to current working directory\&.
+.RE
+.PP
+\fIfile_pattern\fR
+.RS 4
+Pattern to search for (In regex syntax)\&. Use single quotes to avoid shell expansion\&.
+.RE
+.PP
+\fB\-f\fR
+.RS 4
+Show only results of type file\&.
+.RE
+.PP
+\fB\-d\fR
+.RS 4
+Show only results of type dir\&.
+.RE
+.PP
+\fB\-\-type\fR \fIf\fR|\fId\fR
+.RS 4
+Show only results of given type (\fIf\fR
+for file and
+\fId\fR
+for dir)\&.
+.RE
+.PP
+\fB\-c\fR|\fB\-\-case\fR
+.RS 4
+Match case sensitive\&. Default is to match case insensitive\&.
+.RE
+.PP
+\fB\-\-full\fR|\fB\-\-full\-path\fR
+.RS 4
+Print full path to file\&. Defaults to printing relative path\&.
+.RE
+.PP
+\fB\-\-color\fR \fInever\fR|\fIauto\fR|\fIalways\fR
+.RS 4
+Select color use: never, auto (default), always
+.RE
+.PP
+\fB\-\-version\fR
+.RS 4
+Show version number
+.RE
+.PP
+\fB\-h\fR
+.RS 4
+Show synopsis only
+.RE
+.PP
+\fB\-\-help\fR
+.RS 4
+Show man page
+.RE
+.SH "EXAMPLES"
+.PP
+Search for a file or directory with the word info in its name
+.RS 4
+ffind info
+.RE
+.PP
+Search for a file with the word info in its filename
+.RS 4
+ffind info \-f
+.RE
+.PP
+Search for a directory with the word info in its dirname
+.RS 4
+ffind info \-d
+.RE
+.PP
+Search in your home dir for a file or directory with the word info in its name
+.RS 4
+ffind ~ info
+.RE
+.SH "ROADMAP"
+.PP
+\fB\-v\fR|\fB\-\-invert\-match\fR
+.RS 4
+Invert the sense of matching, to select non\-matching files\&.
+.RE
+.PP
+\fB\-\-no\-ln\fR|\fB\-\-no\-symlinks\fR
+.RS 4
+Do not follow symlinks\&. Avoid infinite recursion\&.
+.RE
+.PP
+\fB\-p\fR|\fB\-\-path\fR
+.RS 4
+Search in the entire file path, not only filename or dirname\&.
+.RE
+.PP
+\fB\-\-vcs\fR
+.RS 4
+Do not ignore git and subversion directories\&.
+.RE
+.PP
+Do not show hidden files by default and add \fB\-\-hidden\fR option
+.RS 4
+Show hidden files (starting with dot "\&.")\&.
+.RE
+.PP
+Fuzzy searches
+.RS 4
+Adding
+\fBfstrcmp\fR
+fuzzy search engine might be useful\&.
+.RE
+.PP
+Limit depth option
+.RS 4
+Might need to add this for large projects\&.
+.RE
+.SH "VERSION"
+.sp
+0\&.1
+.SH "SOURCE CODE"
+.sp
+github: https://github\&.com/DavidGamba/ffind
+.SH "LICENSE"
+.sp
+Copyright \(co 2014 David Gamba\&. All rights reserved\&. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself\&.
+.SH "AUTHOR"
+.PP
+\fBDavid Gamba, davidgamba at gmail\&.com\fR
+.RS 4
+Author.
+.RE

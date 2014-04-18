@@ -1,0 +1,120 @@
+= ffind(1)
+David Gamba, davidgamba at gmail.com
+:doctype: manpage
+
+== NAME
+
+ffind - Fast Regex Find, faster common Find searches using the power of Perl's Regex engine 
+
+== SYNOPSIS
+
+# Search for files using regex::
+*ffind* ['dir'] 'file_pattern'
+        [ [*-f*] | [*-d*] | [*--type* 'f'|'d'] ]
+        [*-c*|*--case*]
+        [*--full*|*--full-path*]
+        [*--hidden*]
+        [*--color* 'never'|'auto'|'always']
+
+# Show version number::
+*ffind* *--version*
+
+# show synopsis only::
+*ffind* *-h*
+
+# show man page::
+*ffind* *--help*
+
+== DESCRIPTION
+
+This command focuses on the most common find searches. They are optimized for typing speed as not to interrupt your thought process.
+
+Instead of typing "find . -iname '*pattern*'" or "find -regextype subpar_type -regex \'^.\*?pattern.*$'" you can simply type "ffind pattern".
+
+More obscure searches are probably better suited to find, however find's regex engine is subpar compared to Perl's so...
+
+This command is also only intended to search for files, once you find them, pipe the output if you want to excecute a command on them.
+
+== OPTIONS
+
+'dir'::
+Directory to search from. Defaults to current working directory.
+
+'file_pattern'::
+Pattern to search for (In regex syntax). Use single quotes to avoid shell expansion.
+
+*-f*::
+Show only results of type file.
+
+*-d*::
+Show only results of type dir.
+
+*--type* 'f'|'d'::
+Show only results of given type ('f' for file and 'd' for dir).
+
+*-c*|*--case*::
+Match case sensitive. Default is to match case insensitive.
+
+*--full*|*--full-path*::
+Print full path to file. Defaults to printing relative path.
+
+*--color* 'never'|'auto'|'always'::
+Select color use: never, auto (default), always
+
+*--version*::
+Show version number
+
+*-h*::
+Show synopsis only
+
+*--help*::
+Show man page
+
+== EXAMPLES
+
+Search for a file or directory with the word info in its name::
+ffind info
+
+Search for a file with the word info in its filename::
+ffind info -f
+
+Search for a directory with the word info in its dirname::
+ffind info -d
+
+Search in your home dir for a file or directory with the word info in its name::
+ffind ~ info
+
+== ROADMAP
+
+*-v*|*--invert-match*::
+Invert the sense of matching, to select non-matching files.
+
+*--no-ln*|*--no-symlinks*::
+Do not follow symlinks. Avoid infinite recursion.
+
+*-p*|*--path*::
+Search in the entire file path, not only filename or dirname.
+
+*--vcs*::
+Do not ignore git and subversion directories.
+
+Do not show hidden files by default and add *--hidden* option::
+Show hidden files (starting with dot ".").
+
+Fuzzy searches::
+Adding *fstrcmp* fuzzy search engine might be useful.
+
+Limit depth option::
+Might need to add this for large projects.
+
+== VERSION
+
+0.1
+
+== SOURCE CODE
+
+github: https://github.com/DavidGamba/ffind
+
+== LICENSE
+
+Copyright (C) 2014 David Gamba. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
