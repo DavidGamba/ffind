@@ -8,7 +8,7 @@ ffind - Fast Regex Find, faster common Find searches using the power of Perl's R
 
 == SYNOPSIS
 
-# Search for files using regex::
+ # Search for files using regex::
 *ffind* ['dir'] 'file_pattern'
         [ [*-f*] | [*-d*] | [*--type* 'f'|'d'] ]
         [*-c*|*--case*]
@@ -16,13 +16,13 @@ ffind - Fast Regex Find, faster common Find searches using the power of Perl's R
         [*--hidden*]
         [*--color* 'never'|'auto'|'always']
 
-# Show version number::
+ # Show version number::
 *ffind* *--version*
 
-# show synopsis only::
+ # show synopsis only::
 *ffind* *-h*
 
-# show man page::
+ # show man page::
 *ffind* *--help*
 
 == DESCRIPTION
