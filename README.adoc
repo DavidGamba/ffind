@@ -14,6 +14,7 @@ ffind - Fast Regex Find, faster common Find searches using the power of Perl's R
         [*-c*|*--case*]
         [*--full*|*--full-path*]
         [*--hidden*]
+        [*--vcs*]
         [*--color* 'never'|'auto'|'always']
 
  # Show version number::
@@ -58,6 +59,12 @@ Match case sensitive. Default is to match case insensitive.
 *--full*|*--full-path*::
 Print full path to file. Defaults to printing relative path.
 
+*--hidden*::
+Show hidden files (starting with dot ".").
+
+*--vcs*::
+Do not ignore git and subversion directories.
+
 *--color* 'never'|'auto'|'always'::
 Select color use: never, auto (default), always
 
@@ -92,24 +99,15 @@ Invert the sense of matching, to select non-matching files.
 *--no-ln*|*--no-symlinks*::
 Do not follow symlinks. Avoid infinite recursion.
 
-*-p*|*--path*::
-Search in the entire file path, not only filename or dirname.
-
-*--vcs*::
-Do not ignore git and subversion directories.
-
-Do not show hidden files by default and add *--hidden* option::
-Show hidden files (starting with dot ".").
-
 Fuzzy searches::
-Adding *fstrcmp* fuzzy search engine might be useful.
+Adding *fstrcmp* fuzzy search engine might be useful. Though one could simple put .* in between every char in the pattern.
 
 Limit depth option::
 Might need to add this for large projects.
 
 == VERSION
 
-0.1
+0.2
 
 == SOURCE CODE
 

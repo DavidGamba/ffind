@@ -38,7 +38,7 @@ ffind \- Fast Regex Find, faster common Find searches using the power of Perl\*(
 [\fIdir\fR]
 \fIfile_pattern\fR
 [ [\fB\-f\fR] | [\fB\-d\fR] | [\fB\-\-type\fR
-\fIf\fR|\fId\fR] ] [\fB\-c\fR|\fB\-\-case\fR] [\fB\-\-full\fR|\fB\-\-full\-path\fR] [\fB\-\-hidden\fR] [\fB\-\-color\fR
+\fIf\fR|\fId\fR] ] [\fB\-c\fR|\fB\-\-case\fR] [\fB\-\-full\fR|\fB\-\-full\-path\fR] [\fB\-\-hidden\fR] [\fB\-\-vcs\fR] [\fB\-\-color\fR
 \fInever\fR|\fIauto\fR|\fIalways\fR]
 .RE
 .PP
@@ -111,6 +111,16 @@ Match case sensitive\&. Default is to match case insensitive\&.
 Print full path to file\&. Defaults to printing relative path\&.
 .RE
 .PP
+\fB\-\-hidden\fR
+.RS 4
+Show hidden files (starting with dot "\&.")\&.
+.RE
+.PP
+\fB\-\-vcs\fR
+.RS 4
+Do not ignore git and subversion directories\&.
+.RE
+.PP
 \fB\-\-color\fR \fInever\fR|\fIauto\fR|\fIalways\fR
 .RS 4
 Select color use: never, auto (default), always
@@ -163,26 +173,11 @@ Invert the sense of matching, to select non\-matching files\&.
 Do not follow symlinks\&. Avoid infinite recursion\&.
 .RE
 .PP
-\fB\-p\fR|\fB\-\-path\fR
-.RS 4
-Search in the entire file path, not only filename or dirname\&.
-.RE
-.PP
-\fB\-\-vcs\fR
-.RS 4
-Do not ignore git and subversion directories\&.
-.RE
-.PP
-Do not show hidden files by default and add \fB\-\-hidden\fR option
-.RS 4
-Show hidden files (starting with dot "\&.")\&.
-.RE
-.PP
 Fuzzy searches
 .RS 4
 Adding
 \fBfstrcmp\fR
-fuzzy search engine might be useful\&.
+fuzzy search engine might be useful\&. Though one could simple put \&.* in between every char in the pattern\&.
 .RE
 .PP
 Limit depth option
@@ -191,7 +186,7 @@ Might need to add this for large projects\&.
 .RE
 .SH "VERSION"
 .sp
-0\&.1
+0\&.2
 .SH "SOURCE CODE"
 .sp
 github: https://github\&.com/DavidGamba/ffind
