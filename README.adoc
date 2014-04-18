@@ -29,7 +29,7 @@ ffind - Fast Regex Find, faster common Find searches using the power of Perl's R
 
 This command focuses on the most common find searches. They are optimized for typing speed as not to interrupt your thought process.
 
-Instead of typing "find . -iname '*pattern*'" or "find -regextype subpar_type -regex \'^.\*?pattern.*$'" you can simply type "ffind pattern".
+Instead of typing "find . -iname \'\*pattern*\'" or "find -regextype subpar_type -regex \'^.\*?pattern.*$'" you can simply type "ffind pattern".
 
 More obscure searches are probably better suited to find, however find's regex engine is subpar compared to Perl's so...
 
