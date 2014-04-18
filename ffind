@@ -33,7 +33,13 @@ GetOptions(
 
 sub show_man
 {
-  my $script_dir = dirname($0);
+  my $script_dir = undef;
+  if(-l __FILE__) {
+    $script_dir = dirname(readlink(__FILE__));
+  }
+  else {
+    $script_dir = dirname(__FILE__);
+  }
   if (-f "$script_dir/ffind.1") {
     exec('man', '-l', "$script_dir/ffind.1");
   }
