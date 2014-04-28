@@ -14,7 +14,7 @@ use File::Find;
 use Term::ANSIColor;
 use Getopt::Long qw(:config passthrough no_ignore_case);
 use Pod::Usage;
-use File::Spec::Functions qw( abs2rel );
+use File::Spec::Functions qw( abs2rel rel2abs);
 use File::Basename;
 my $color = 'auto';
 GetOptions(
@@ -82,7 +82,7 @@ exit 0;
 sub d
 {
     my $file = $File::Find::name;
-    $file = abs_path($file);
+    $file = rel2abs($file);
     my $basename = basename($file);
     return if ! -f $file and ( $type_file or $type and $type eq 'f' );
     return if ! -d $file and ( $type_dir  or $type and $type eq 'd' );
@@ -103,7 +103,7 @@ sub d
     }
     my $dirname = dirname($file);
     $dirname = abs2rel($dirname, $cwd) unless( $fullpath );
-    if ( $fullpath or abs_path($dirname) ne abs_path($cwd) ) {
+    if ( $fullpath or rel2abs($dirname) ne rel2abs($cwd) ) {
       print $dirname . "/";
     }
     print_match( $pre, $match );
