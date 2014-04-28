@@ -55,6 +55,10 @@ my $dir         = undef;
 if( defined $arg2 ) {
   $dir          = $arg1;
   $file_pattern = $arg2;
+  # If given dir has an absolute path then print result as absolute path
+  if($dir =~ /^\//) {
+    $fullpath = 1;
+  }
 }
 else {
   $file_pattern = $arg1;
