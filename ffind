@@ -75,6 +75,13 @@ if (-t STDOUT) {
     $color = 'always' if $color eq 'auto';
 }
 
+local $SIG{__WARN__} = sub {
+    my $message = shift;
+    if( $message =~ /Can't cd to \(([^)]*)\) ([^:]*): Permission denied/ ) {
+      print STDERR "ffind: '$1$2': Permission denied\n";
+    }
+};
+
 my $cwd = cwd;
 $dir = ($dir) ? abs_path($dir) : $cwd;
 find( \&d, $dir );
