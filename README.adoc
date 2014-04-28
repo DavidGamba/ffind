@@ -107,7 +107,7 @@ Might need to add this for large projects.
 
 == VERSION
 
-0.2
+0.3
 
 == SOURCE CODE
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 my $version_info = <<EOL;
 ffind $VERSION
 Copyright © 2014 David Gamba. All rights reserved. This program is free
