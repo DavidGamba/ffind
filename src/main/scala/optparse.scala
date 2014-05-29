@@ -73,6 +73,9 @@ object OptionParser {
       // Empty list
       case Nil => Tuple2(options, skip)
 
+      // Stop on --
+      case opt :: tail if opt == "--" => Tuple2(options, skip ++: tail.toArray)
+
       // Flags
       case opt :: tail if option_map.is_option(opt) && option_map.is_flag(opt) && option_map.match_get(opt) != None =>
         parseOptions(tail, option_map,
