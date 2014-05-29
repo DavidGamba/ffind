@@ -18,7 +18,8 @@ object OptionParser {
 
   implicit class OptionMapImprovements(val m: OptionMapBuilder) {
     def match_key(opt: String): String = {
-      val s = m.keys.find(_.matches(s"""[^-]*$opt(\\|.*)?(=.)?""")).getOrElse("")
+      val stripped_opt = if(opt.contains("=")) opt.split("=")(0) else opt
+      val s = m.keys.find(_.matches(s"""[^-]*$stripped_opt(\\|.*)?(=.)?""")).getOrElse("")
       logger.trace(s"match_key: $opt -> $s")
       s
     }
@@ -76,6 +77,16 @@ object OptionParser {
       // Stop on --
       case opt :: tail if opt == "--" => Tuple2(options, skip ++: tail.toArray)
 
+      // Options with values after "=". e.g --opt=value
+      case opt :: tail if option_map.is_option(opt) &&
+                          !option_map.is_flag(opt) &&
+                          option_map.match_get(opt) != None &&
+                          opt.contains("=")
+                          =>
+        parseOptions(tail, option_map,
+          skip = skip,
+          options = options ++ Map(option_map.match_apply(opt) -> opt.split("=")(1)))
+
       // Flags
       case opt :: tail if option_map.is_option(opt) && option_map.is_flag(opt) && option_map.match_get(opt) != None =>
         parseOptions(tail, option_map,
@@ -90,7 +101,10 @@ object OptionParser {
 
       // Fail on unknown options
       case opt :: tail if !option_map.is_option(opt) && opt.startsWith("-") => {
-        System.err.println(s"Unknown option: $opt")
+        if (opt.contains("="))
+          System.err.println(s"""Unknown option: ${opt.split("=")(0)}""")
+        else
+          System.err.println(s"Unknown option: $opt")
         sys.exit(1)
       }
 
