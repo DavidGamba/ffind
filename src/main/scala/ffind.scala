@@ -30,18 +30,19 @@ object FFind {
     logger.info(s"ffind ${args.mkString(" ")}")
     val (options, remaining) = OptionParser.getOptions(args,
       Map(
-        "--help" -> 'man,
-        "-h" -> 'help,
-        "--version" -> 'version,
-        "-c|--case" -> 'case,
-        "-f" -> 'type_file,
-        "-d" -> 'type_dir,
-        "--hidden" -> 'hidden,
-        "--vcs" -> 'vcs,
+        "--help"          -> 'man,
+        "-h"              -> 'help,
+        "--version"       -> 'version,
+        "-c|--case"       -> 'case,
+        "-f"              -> 'type_file,
+        "-d"              -> 'type_dir,
+        "--hidden"        -> 'hidden,
+        "--vcs"           -> 'vcs,
         "--full|fullpath" -> 'fullpath,
-        "--type=s" -> 'type,
-        "--color=s" -> 'color,
-        "--int=i" -> 'int
+        "--type=s"        -> 'type,
+        "--color=s"       -> 'color,
+        "--int=i"         -> 'int,
+        "--function"      -> println("function")
       ))
     if (options isDefinedAt 'help) {
       System.err.println(help_string)
