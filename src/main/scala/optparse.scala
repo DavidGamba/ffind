@@ -8,7 +8,7 @@ object OptionParser {
   val logger = LoggerFactory.getLogger(this.getClass.getName)
 
   type OptionMap = Map[Symbol, Any]
-  type OptionMapBuilder = Map[String, Symbol]
+  type OptionMapBuilder = Map[String, Any]
 
   def getOptions(args: Array[String], option_map: OptionMapBuilder): Tuple2[OptionMap, Array[String]] = {
     logger.debug(s"""[getOptions] Received args: ${args.mkString(",")}""")
@@ -26,12 +26,12 @@ object OptionParser {
     def match_get(opt: String): Option[Symbol] = {
       val s = m.get(m.match_key(opt))
       logger.trace(s"match_get: $opt -> $s")
-      s
+      s.asInstanceOf[Option[Symbol]]
     }
     def match_apply(opt: String): Symbol = {
       val s = m(m.match_key(opt))
       logger.trace(s"match_apply: $opt -> $s")
-      s
+      s.asInstanceOf[Symbol]
     }
 
     // Check allows to stop checking for options, e.g. -- is passed.
@@ -53,6 +53,9 @@ object OptionParser {
       val ret = if (key.matches(".*=i$")) {
         logger.trace("toInt")
         value.toInt
+      } else if (key.matches(".*=f$")) {
+        logger.trace("toDouble")
+        value.toDouble
       } else if (key.matches(".*=s$")) {
         logger.trace("string")
         value
@@ -85,7 +88,7 @@ object OptionParser {
                           =>
         parseOptions(tail, option_map,
           skip = skip,
-          options = options ++ Map(option_map.match_apply(opt) -> opt.split("=")(1)))
+          options = options ++ Map(option_map.match_apply(opt) -> option_map.cast_value(opt, opt.split("=")(1))))
 
       // Flags
       case opt :: tail if option_map.is_option(opt) && option_map.is_flag(opt) && option_map.match_get(opt) != None =>
@@ -99,13 +102,15 @@ object OptionParser {
           skip = skip,
           options = options ++ Map(option_map.match_apply(opt) -> option_map.cast_value(opt, value)))
 
-      // Fail on unknown options
+      // Warn on unknown options and ignore them
       case opt :: tail if !option_map.is_option(opt) && opt.startsWith("-") => {
         if (opt.contains("="))
           System.err.println(s"""Unknown option: ${opt.split("=")(0)}""")
         else
           System.err.println(s"Unknown option: $opt")
-        sys.exit(1)
+        parseOptions(tail, option_map,
+          options = options,
+          skip = skip)
       }
 
       // Skip extra arguments
