@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file._
 import scala.collection.JavaConversions._
+import scala.sys.process._
 
 object FFind {
 
@@ -26,12 +27,23 @@ object FFind {
 
   def getFileTree(f: File): Stream[File] = f #:: Option(f.listFiles()).toStream.flatten.flatMap(getFileTree)
 
+  def show_man_page() = {
+    val os = System.getProperty("os.name")
+    if (os == "Linux") {
+      Seq("man", "-l", "ffind.1").!
+    }
+    else if(os == "NT") {
+      // groff -Tascii -mm your_file | more
+      Seq("groff", "-Tascii", "ffind.1").!
+    }
+  }
+
   def run(args: Array[String]) {
     logger.info(s"ffind ${args.mkString(" ")}")
     val (options, remaining) = OptionParser.getOptions(args,
       Map(
-        "--help"          -> 'man,
-        "-h"              -> 'help,
+        "--help"          -> { () => show_man_page(); sys.exit(1) },
+        "-h"              -> { () => System.err.println(help_string); sys.exit(1) },
         "--version"       -> 'version,
         "-c|--case"       -> 'case,
         "-f"              -> 'type_file,
@@ -42,12 +54,8 @@ object FFind {
         "--type=s"        -> 'type,
         "--color=s"       -> 'color,
         "--int=i"         -> 'int,
-        "--function"      -> println("function")
+        "--function"      -> { () => println("function") }
       ))
-    if (options isDefinedAt 'help) {
-      System.err.println(help_string)
-      sys.exit(1)
-    }
     logger.debug(s"options: $options")
     logger.debug(s"""remaining: ${remaining.mkString(", ")}""")
 
