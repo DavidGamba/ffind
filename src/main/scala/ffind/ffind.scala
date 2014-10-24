@@ -52,10 +52,9 @@ object FFind {
         "--vcs"           -> 'vcs,
         "--full|fullpath" -> 'fullpath,
         "--type=s"        -> 'type,
-        "--color=s"       -> 'color,
-        "--int=i"         -> 'int,
-        "--function"      -> { () => println("function") }
-      ))
+        "--color=s"       -> 'color
+      )
+    )
     logger.debug(s"options: $options")
     logger.debug(s"""remaining: ${remaining.mkString(", ")}""")
 
@@ -70,15 +69,31 @@ object FFind {
       }
       Tuple2(remaining(1), new File(remaining(0)))
     } else {
+      // TODO: Have it so it searches the full git repo by default
       Tuple2(remaining(0), new File("./"))
     }
 
     logger.debug(s"file_pattern: $file_pattern")
     logger.debug(s"dir: $dir")
-    val nameFilter = s"""^(.*?)($file_pattern)(.*)$$"""
-    getFileTree(dir).foreach(
-      filename => if (filename.getName.matches(nameFilter))
-        println(filename)
-    )
+    val nameFilter = if(options.getOrElse('case,false).asInstanceOf[Boolean])
+        new util.matching.Regex(
+          s"""^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
+      else
+        new util.matching.Regex(
+          s"""(?i)^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
+
+    logger.debug(s"regex: %s" + nameFilter.toString)
+    getFileTree(dir).foreach{ filename =>
+      nameFilter findFirstMatchIn filename.getName match {
+        case Some(m) => {
+          print(filename.getParent + "/")
+          print(m.group("pre"))
+          print(Console.RED + m.group("matched") + Console.RESET)
+          print(m.group("post"))
+          println()
+        }
+        case None => {}
+      }
+    }
   }
 }
