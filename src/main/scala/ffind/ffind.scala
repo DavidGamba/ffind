@@ -83,17 +83,30 @@ object FFind {
           s"""(?i)^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
 
     logger.debug(s"regex: %s" + nameFilter.toString)
-    getFileTree(dir).foreach{ filename =>
-      nameFilter findFirstMatchIn filename.getName match {
+    get_matched_files(dir, nameFilter)( (filename, m) => {
+        print(filename.getParent + "/")
+        print(m.group("pre"))
+        print(Console.RED + m.group("matched") + Console.RESET)
+        print(m.group("post"))
+        println()
+      }
+    )
+  }
+
+  def get_matched_files(dir: File, nameFilter: util.matching.Regex)(f: (File, scala.util.matching.Regex.Match) => Unit) {
+    match_files(dir, nameFilter)( (filename, m) =>
+      m match {
         case Some(m) => {
-          print(filename.getParent + "/")
-          print(m.group("pre"))
-          print(Console.RED + m.group("matched") + Console.RESET)
-          print(m.group("post"))
-          println()
+          f(filename, m)
         }
         case None => {}
       }
+    )
+  }
+
+  def match_files(dir: File, nameFilter: util.matching.Regex)(f: (File, Option[scala.util.matching.Regex.Match]) => Unit) {
+    getFileTree(dir).foreach{ filename =>
+      f(filename, nameFilter findFirstMatchIn filename.getName)
     }
   }
 }
