@@ -1,23 +1,53 @@
-import com.github.retronym.SbtOneJar._
+organization := "com.gambaeng"
 
 name := "ffind"
 
-version := "0.1"
+description := """ffind - Fast Regex Find, faster common Find searches using the power of Perl's Regex engine"""
 
-scalaVersion:= "2.11.0"
+scalaVersion := "2.11.0"
 
-resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+crossScalaVersions := Seq("2.11.0")
 
-oneJarSettings
+libraryDependencies ++= Seq(
+  "org.scalatest" % "scalatest_2.11" % "2.1.7" % "test",
+  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  "org.slf4j" % "slf4j-api" % "1.7.7",
+  "ch.qos.logback" % "logback-classic" % "1.1.2"
+)
 
-libraryDependencies += "commons-lang" % "commons-lang" % "2.6"
+version := "0.1.0"
 
-// libraryDependencies += groupID % artifactID % revision % configuration
+licenses := Seq("MIT License" -> url("http://www.opensource.org/licenses/mit-license.php"))
 
-// libraryDependencies += "log4j" % "log4j" % "1.2.17"
+homepage := Some(url("https://github.com/DavidGamba/ffind"))
 
-// libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2"
+scmInfo := Some(
+  ScmInfo(
+    browseUrl = url("http://github.com/DavidGamba/ffind"),
+    connection = "scm:git:git@github.com:DavidGamba/ffind.git"
+  )
+)
 
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.7"
+publishMavenStyle := true
 
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2"
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}
+
+publishArtifact in Test := false
+
+pomIncludeRepository := { _ => false }
+
+pomExtra := (
+  <developers>
+    <developer>
+      <id>DavidGamba</id>
+      <name>David Gamba</name>
+      <url>http://gambaeng.com</url>
+    </developer>
+  </developers>
+)
