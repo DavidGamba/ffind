@@ -1,6 +1,7 @@
 package com.gambaeng.ffind
 
 import com.gambaeng.utils.OptionParser
+import com.gambaeng.utils.OptionMap
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -75,15 +76,7 @@ object FFind {
 
     logger.debug(s"file_pattern: $file_pattern")
     logger.debug(s"dir: $dir")
-    val nameFilter = if(options.contains('case) && options('case))
-        new util.matching.Regex(
-          s"""^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
-      else
-        new util.matching.Regex(
-          s"""(?i)^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
-
-    logger.debug(s"regex: %s" + nameFilter.toString)
-    get_matched_files(dir, nameFilter)( (filename, m) => {
+    ffind(file_pattern, dir, options)( (filename, m) => {
         print(filename.getParent + "/")
         print(m.group("pre"))
         print(Console.RED + m.group("matched") + Console.RESET)
@@ -91,6 +84,17 @@ object FFind {
         println()
       }
     )
+  }
+
+  def ffind(file_pattern: String, dir: File, options: OptionMap)(f: (File, scala.util.matching.Regex.Match) => Unit) {
+    val nameFilter = if(options.contains('case) && options('case))
+        new util.matching.Regex(
+          s"""^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
+      else
+        new util.matching.Regex(
+          s"""(?i)^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
+    logger.debug(s"regex: %s" + nameFilter.toString)
+    get_matched_files(dir, nameFilter)( (filename, m) => { f(filename, m) })
   }
 
   def get_matched_files(dir: File, nameFilter: util.matching.Regex)(f: (File, scala.util.matching.Regex.Match) => Unit) {

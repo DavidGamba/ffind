@@ -27,7 +27,7 @@ package com.gambaeng.utils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class OptionParser(options_map: Map[Symbol, Any]) {
+class OptionMap(options_map: Map[Symbol, Any]) {
   def apply[T](name: Symbol) : T = {
     println(name)
     println(options_map(name).getClass)
@@ -45,18 +45,18 @@ object OptionParser {
 
   val logger = LoggerFactory.getLogger(this.getClass.getName)
 
-  type OptionMap = Map[Symbol, Any]
+  type OptionMapType = Map[Symbol, Any]
   type OptionMapBuilder = Map[String, Any]
 
-  def getOptions(args: Array[String], option_map: OptionMapBuilder): (OptionMap, Array[String]) = {
+  def getOptions(args: Array[String], option_map: OptionMapBuilder): (OptionMapType, Array[String]) = {
     logger.debug(s"""[getOptions] Received args: ${args.mkString(",")}""")
     logger.debug(s"""[getOptions] Received map:  $option_map""")
     parseOptions(args.toList, option_map)
   }
 
-  def parse(args: Array[String], option_map: OptionMapBuilder): (OptionParser, Array[String]) = {
+  def parse(args: Array[String], option_map: OptionMapBuilder): (OptionMap, Array[String]) = {
     val (options, remaining) = getOptions(args, option_map)
-    (new OptionParser(options), remaining)
+    (new OptionMap(options), remaining)
   }
 
   implicit class OptionMapImprovements(val m: OptionMapBuilder) {
@@ -123,8 +123,8 @@ object OptionParser {
 
   private def parseOptions(args: List[String],
                            option_map: OptionMapBuilder,
-                           options: OptionMap = Map[Symbol, String](),
-                           skip: Array[String] = Array[String]()): (OptionMap, Array[String]) = {
+                           options: OptionMapType = Map[Symbol, String](),
+                           skip: Array[String] = Array[String]()): (OptionMapType, Array[String]) = {
     logger.trace(s"""[parseOptions] args:    $args""")
     logger.trace(s"""[parseOptions] options: $options""")
     logger.trace(s"""[parseOptions] skip:    ${skip.mkString(",")}""")
