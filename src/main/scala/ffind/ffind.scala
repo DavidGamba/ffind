@@ -40,7 +40,7 @@ object FFind {
 
   def run(args: Array[String]) {
     logger.info(s"ffind ${args.mkString(" ")}")
-    val (options, remaining) = OptionParser.getOptions(args,
+    val (options, remaining) = OptionParser.parse(args,
       Map(
         "--help"          -> { () => show_man_page(); sys.exit(1) },
         "-h"              -> { () => System.err.println(help_string); sys.exit(1) },
@@ -67,15 +67,15 @@ object FFind {
       if (remaining(0).startsWith("/")) {
         // options('fullpath -> true)
       }
-      Tuple2(remaining(1), new File(remaining(0)))
+      (remaining(1), new File(remaining(0)))
     } else {
       // TODO: Have it so it searches the full git repo by default
-      Tuple2(remaining(0), new File("./"))
+      (remaining(0), new File("./"))
     }
 
     logger.debug(s"file_pattern: $file_pattern")
     logger.debug(s"dir: $dir")
-    val nameFilter = if(options.getOrElse('case,false).asInstanceOf[Boolean])
+    val nameFilter = if(options.contains('case) && options('case))
         new util.matching.Regex(
           s"""^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
       else

@@ -27,6 +27,20 @@ package com.gambaeng.utils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+class OptionParser(options_map: Map[Symbol, Any]) {
+  def apply[T](name: Symbol) : T = {
+    println(name)
+    println(options_map(name).getClass)
+    options_map(name).asInstanceOf[T]
+  }
+  def get[T](name: Symbol) : T = {
+    options_map(name).asInstanceOf[T]
+  }
+  def contains(name: Symbol): Boolean = {
+    options_map.contains(name)
+  }
+}
+
 object OptionParser {
 
   val logger = LoggerFactory.getLogger(this.getClass.getName)
@@ -34,10 +48,15 @@ object OptionParser {
   type OptionMap = Map[Symbol, Any]
   type OptionMapBuilder = Map[String, Any]
 
-  def getOptions(args: Array[String], option_map: OptionMapBuilder): Tuple2[OptionMap, Array[String]] = {
+  def getOptions(args: Array[String], option_map: OptionMapBuilder): (OptionMap, Array[String]) = {
     logger.debug(s"""[getOptions] Received args: ${args.mkString(",")}""")
     logger.debug(s"""[getOptions] Received map:  $option_map""")
     parseOptions(args.toList, option_map)
+  }
+
+  def parse(args: Array[String], option_map: OptionMapBuilder): (OptionParser, Array[String]) = {
+    val (options, remaining) = getOptions(args, option_map)
+    (new OptionParser(options), remaining)
   }
 
   implicit class OptionMapImprovements(val m: OptionMapBuilder) {
@@ -105,16 +124,16 @@ object OptionParser {
   private def parseOptions(args: List[String],
                            option_map: OptionMapBuilder,
                            options: OptionMap = Map[Symbol, String](),
-                           skip: Array[String] = Array[String]()): Tuple2[OptionMap, Array[String]] = {
+                           skip: Array[String] = Array[String]()): (OptionMap, Array[String]) = {
     logger.trace(s"""[parseOptions] args:    $args""")
     logger.trace(s"""[parseOptions] options: $options""")
     logger.trace(s"""[parseOptions] skip:    ${skip.mkString(",")}""")
     args match {
       // Empty list
-      case Nil => Tuple2(options, skip)
+      case Nil => (options, skip)
 
       // Stop on --
-      case opt :: tail if opt == "--" => Tuple2(options, skip ++: tail.toArray)
+      case opt :: tail if opt == "--" => (options, skip ++: tail.toArray)
 
       // Options with values after "=". e.g --opt=value
       case opt :: tail if option_map.is_option(opt) &&

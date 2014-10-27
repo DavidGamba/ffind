@@ -1,5 +1,7 @@
+import com.gambaeng.ffind.FFind
+
 object Main {
   def main(args: Array[String]) {
-    com.gambaeng.ffind.FFind.run(args)
+    FFind.run(args)
   }
 }
