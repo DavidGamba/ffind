@@ -27,18 +27,29 @@ package com.gambaeng.utils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class OptionMap(options_map: Map[Symbol, Any]) {
-  def apply[T](name: Symbol) : T = {
-    println(name)
-    println(options_map(name).getClass)
-    options_map(name).asInstanceOf[T]
-  }
-  def get[T](name: Symbol) : T = {
-    options_map(name).asInstanceOf[T]
-  }
-  def contains(name: Symbol): Boolean = {
-    options_map.contains(name)
-  }
+object OptionMap {
+  def apply(options_map: Map[Symbol, Any]) = new OptionMap(options_map)
+
+  def apply(kv: (Symbol, Any)*) = new OptionMap(kv.toMap)
+}
+
+class OptionMap(options_map: Map[Symbol, Any]) extends Map[Symbol, Any] {
+
+  def apply[T](name: Symbol) : T = options_map(name).asInstanceOf[T]
+
+  def get[T](name: Symbol) : T = options_map(name).asInstanceOf[T]
+
+  def get(name: Symbol) : Option[Any] = options_map.get(name)
+
+  override def contains(name: Symbol): Boolean = options_map.contains(name)
+
+  def +[B1 >: Any](kv: (Symbol, B1)): OptionMap = OptionMap(options_map + kv)
+
+  def -(key: Symbol): OptionMap = OptionMap(options_map - key)
+
+  def iterator = options_map.iterator
+
+  def toMap = options_map
 }
 
 object OptionParser {
@@ -56,7 +67,7 @@ object OptionParser {
 
   def parse(args: Array[String], option_map: OptionMapBuilder): (OptionMap, Array[String]) = {
     val (options, remaining) = getOptions(args, option_map)
-    (new OptionMap(options), remaining)
+    (OptionMap(options), remaining)
   }
 
   implicit class OptionMapImprovements(val m: OptionMapBuilder) {
