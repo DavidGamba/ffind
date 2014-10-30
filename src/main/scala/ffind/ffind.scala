@@ -47,12 +47,12 @@ object FFind {
         "-h"              -> { () => System.err.println(help_string); sys.exit(1) },
         "--version"       -> 'version,
         "-c|--case"       -> 'case,
+        "--type=s"        -> 'type,
         "-f"              -> 'type_file,
         "-d"              -> 'type_dir,
         "--hidden"        -> 'hidden,
         "--vcs"           -> 'vcs,
         "--full|fullpath" -> 'fullpath,
-        "--type=s"        -> 'type,
         "--color=s"       -> 'color
       )
     )
@@ -86,7 +86,17 @@ object FFind {
     )
   }
 
+  def validate_options(options: OptionMap) {
+    if (options.contains('type) &&
+        options[String]('type) != "f" &&
+        options[String]('type) != "d") {
+      System.err.println("[ERROR] Wrong type defined. Only 'f' and 'd' supported.")
+      sys.exit(1)
+    }
+  }
+
   def ffind(file_pattern: String, dir: File, options: OptionMap)(f: (File, scala.util.matching.Regex.Match) => Unit) {
+    validate_options(options: OptionMap)
     val nameFilter = if(options.contains('case) && options('case))
         new util.matching.Regex(
           s"""^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
@@ -94,7 +104,20 @@ object FFind {
         new util.matching.Regex(
           s"""(?i)^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
     logger.debug(s"regex: %s" + nameFilter.toString)
-    get_matched_files(dir, nameFilter)( (filename, m) => { f(filename, m) })
+    get_matched_files(dir, nameFilter)( (filename, m) => {
+      if ( (options.contains('type_file) && options('type_file)) ||
+           (options.contains('type) && options[String]('type) == "f") ) {
+        if (filename.isFile)
+          f(filename, m)
+      } else if ( (options.contains('type_dir) && options('type_dir)) ||
+                  (options.contains('type) && options[String]('type) == "d") ) {
+        if (filename.isDirectory)
+          f(filename, m)
+      } else {
+        f(filename, m)
+      }
+
+    })
   }
 
   def get_matched_files(dir: File, nameFilter: util.matching.Regex)(f: (File, scala.util.matching.Regex.Match) => Unit) {
