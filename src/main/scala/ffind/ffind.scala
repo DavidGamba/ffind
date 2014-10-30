@@ -5,11 +5,14 @@ import com.gambaeng.utils.OptionMap
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.io.FileInputStream
 import java.nio.file._
 import scala.collection.JavaConversions._
 import scala.sys.process._
+import scala.language.implicitConversions
 
 object FFind {
+  implicit def file2RichFile(file: File) = new RichFile(file)
 
   val logger = LoggerFactory.getLogger(this.getClass.getName)
 
@@ -50,6 +53,7 @@ object FFind {
         "--type=s"        -> 'type,
         "-f"              -> 'type_file,
         "-d"              -> 'type_dir,
+        "-I"              -> 'ignore_binary,
         "--hidden"        -> 'hidden,
         "--vcs"           -> 'vcs,
         "--full|fullpath" -> 'fullpath,
@@ -107,8 +111,10 @@ object FFind {
     get_matched_files(dir, nameFilter)( (filename, m) => {
       if ( (options.contains('type_file) && options('type_file)) ||
            (options.contains('type) && options[String]('type) == "f") ) {
-        if (filename.isFile)
-          f(filename, m)
+        if (filename.isFile) {
+          if(!(options.contains('ignore_binary) && options('ignore_binary) && filename.isBinary))
+            f(filename, m)
+        }
       } else if ( (options.contains('type_dir) && options('type_dir)) ||
                   (options.contains('type) && options[String]('type) == "d") ) {
         if (filename.isDirectory)
@@ -134,6 +140,36 @@ object FFind {
   def match_files(dir: File, nameFilter: util.matching.Regex)(f: (File, Option[scala.util.matching.Regex.Match]) => Unit) {
     getFileTree(dir).foreach{ filename =>
       f(filename, nameFilter findFirstMatchIn filename.getName)
+    }
+  }
+
+  class RichFile(val file: File) {
+    /**
+     *  Guess whether given file is binary. Just checks for anything under 0x09.
+     *  Adapted from: http://stackoverflow.com/a/13533390/1601989
+     */
+    def isBinary: Boolean = {
+        val in = new FileInputStream(file)
+        val size = if(in.available() > 1024) 1024 else in.available()
+        val data = new Array[Byte](size)
+        in.read(data)
+        in.close()
+
+        var ascii = 0
+        var other = 0
+
+        for( i <- 0 until data.length) {
+            val b: Byte = data(i)
+            if( b < 0x09 ) return true
+
+            if( b == 0x09 || b == 0x0A || b == 0x0C || b == 0x0D ) ascii+=1
+            else if( b >= 0x20 && b <= 0x7E ) ascii+=1
+            else other+=1
+        }
+
+        if( other == 0 ) return false
+
+        100 * other / (ascii + other) > 95
     }
   }
 }
