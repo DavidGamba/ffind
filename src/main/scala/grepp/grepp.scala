@@ -2,6 +2,7 @@ package com.gambaeng.grepp
 
 import com.gambaeng.utils.OptionParser
 import com.gambaeng.utils.OptionMap
+import com.gambaeng.utils.FileUtils
 import com.gambaeng.ffind.FFind
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -9,7 +10,6 @@ import java.io.File
 import java.nio.file._
 import scala.collection.JavaConversions._
 import scala.sys.process._
-import scala.io.Source
 import java.io.FileWriter
 import java.io.BufferedWriter
 import java.io.IOException
@@ -31,8 +31,6 @@ object Grepp {
 
   grepp [-h |-?] # shows short help
 """
-
-  def getFileTree(f: File): Stream[File] = f #:: Option(f.listFiles()).toStream.flatten.flatMap(getFileTree)
 
   def show_man_page() = {
     val os = System.getProperty("os.name")
@@ -103,7 +101,7 @@ object Grepp {
         val tmp = new File("/tmp/grepp")
         val fw = new FileWriter(tmp, false)
         val bw = new BufferedWriter(fw)
-        match_in_files(filename, patternFilter)( (line, matches) => {
+        FileUtils.match_lines_in_file(filename, patternFilter)( (line, matches) => {
           // filename
           print(Console.MAGENTA + filename.getParent + "/")
           print(m.group("pre"))
@@ -133,7 +131,7 @@ object Grepp {
     }
     else {
       FFind.ffind(file_pattern, dir, ffind_options)( (filename, m) => {
-          match_in_files(filename, patternFilter)( (line, matches) => {
+          FileUtils.match_lines_in_file(filename, patternFilter)( (line, matches) => {
             // filename
             print(Console.MAGENTA + filename.getParent + "/")
             print(m.group("pre"))
@@ -152,22 +150,4 @@ object Grepp {
     }
   }
 
-  /**
-   * Given a file and a regular expression, a required function and an optional function.
-   * Passes the iterator of matches to the required function.
-   * Passes the lines without matches to the optional function.
-   */
-  def match_in_files(file: File, pattern: util.matching.Regex)
-                    (f: (String, Iterator[scala.util.matching.Regex.Match]) => Unit)
-                    (implicit p: (String) => Unit = { _ => Unit }) {
-    for(line <- Source.fromFile(file).getLines()) {
-      val matches = pattern.findAllMatchIn(line)
-      if(matches.nonEmpty) {
-        f(line, matches)
-      }
-      else {
-        p(line)
-      }
-    }
-  }
 }

@@ -2,17 +2,17 @@ package com.gambaeng.ffind
 
 import com.gambaeng.utils.OptionParser
 import com.gambaeng.utils.OptionMap
+import com.gambaeng.utils.FileUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.FileInputStream
 import java.nio.file._
 import scala.collection.JavaConversions._
 import scala.sys.process._
 import scala.language.implicitConversions
 
 object FFind {
-  implicit def file2RichFile(file: File) = new RichFile(file)
+  implicit def file2RichFile(file: File) = new FileUtils.RichFile(file)
 
   val logger = LoggerFactory.getLogger(this.getClass.getName)
 
@@ -28,8 +28,6 @@ object FFind {
         ffind [--help]       # shows the man page
 
 """
-
-  def getFileTree(f: File): Stream[File] = f #:: Option(f.listFiles()).toStream.flatten.flatMap(getFileTree)
 
   def show_man_page() = {
     val os = System.getProperty("os.name")
@@ -108,7 +106,7 @@ object FFind {
         new util.matching.Regex(
           s"""(?i)^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
     logger.debug(s"regex: %s" + nameFilter.toString)
-    get_matched_files(dir, nameFilter)( (filename, m) => {
+    FileUtils.get_matched_files(dir, nameFilter)( (filename, m) => {
       if ( (options.contains('type_file) && options('type_file)) ||
            (options.contains('type) && options[String]('type) == "f") ) {
         if (filename.isFile) {
@@ -124,52 +122,5 @@ object FFind {
       }
 
     })
-  }
-
-  def get_matched_files(dir: File, nameFilter: util.matching.Regex)(f: (File, scala.util.matching.Regex.Match) => Unit) {
-    match_files(dir, nameFilter)( (filename, m) =>
-      m match {
-        case Some(m) => {
-          f(filename, m)
-        }
-        case None => {}
-      }
-    )
-  }
-
-  def match_files(dir: File, nameFilter: util.matching.Regex)(f: (File, Option[scala.util.matching.Regex.Match]) => Unit) {
-    getFileTree(dir).foreach{ filename =>
-      f(filename, nameFilter findFirstMatchIn filename.getName)
-    }
-  }
-
-  class RichFile(val file: File) {
-    /**
-     *  Guess whether given file is binary. Just checks for anything under 0x09.
-     *  Adapted from: http://stackoverflow.com/a/13533390/1601989
-     */
-    def isBinary: Boolean = {
-        val in = new FileInputStream(file)
-        val size = if(in.available() > 1024) 1024 else in.available()
-        val data = new Array[Byte](size)
-        in.read(data)
-        in.close()
-
-        var ascii = 0
-        var other = 0
-
-        for( i <- 0 until data.length) {
-            val b: Byte = data(i)
-            if( b < 0x09 ) return true
-
-            if( b == 0x09 || b == 0x0A || b == 0x0C || b == 0x0D ) ascii+=1
-            else if( b >= 0x20 && b <= 0x7E ) ascii+=1
-            else other+=1
-        }
-
-        if( other == 0 ) return false
-
-        100 * other / (ascii + other) > 95
-    }
   }
 }
