@@ -90,7 +90,15 @@ object OptionParser {
     def match_apply(opt: String): Symbol = {
       val s = m(m.match_key(opt))
       logger.trace(s"match_apply: $opt -> $s")
-      s.asInstanceOf[Symbol]
+      try {
+        s.asInstanceOf[Symbol]
+      }
+      catch {
+        case e: java.lang.ClassCastException => {
+          logger.error(s"Make sure that the option target for '$opt' is a Symbol")
+          throw e
+        }
+      }
     }
 
     // Check allows to stop checking for options, e.g. -- is passed.

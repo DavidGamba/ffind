@@ -47,8 +47,8 @@ object Grepp {
     logger.info(s"grepp ${args.mkString(" ")}")
     val (options, remaining) = OptionParser.parse(args,
       Map(
-        "--help"          -> { () => show_man_page(); sys.exit(1) },
-        "-h"              -> { () => System.err.println(help_string); sys.exit(1) },
+        "--help=p"        -> { () => show_man_page(); sys.exit(1) },
+        "-h=p"            -> { () => System.err.println(help_string); sys.exit(1) },
         "--version"       -> 'version,
         "-c|--case"       -> 'case,
         "-I"              -> 'binary,
