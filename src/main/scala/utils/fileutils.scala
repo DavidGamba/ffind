@@ -56,6 +56,8 @@ object FileUtils {
      *  Adapted from: http://stackoverflow.com/a/13533390/1601989
      */
     def isBinary: Boolean = {
+        if (file.isDirectory)
+          return false
         val in = new FileInputStream(file)
         val size = if(in.available() > 1024) 1024 else in.available()
         val data = new Array[Byte](size)
