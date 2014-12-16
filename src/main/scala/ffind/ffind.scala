@@ -98,27 +98,45 @@ object FFind {
   }
 
   def ffind(file_pattern: String, dir: File, options: OptionMap)(f: (File, scala.util.matching.Regex.Match) => Unit) {
+    logger.debug("file_pattern: %s, dir: %s, OptionMap: %s".format(file_pattern, dir, options))
+
     validate_options(options: OptionMap)
+
+    val file_only: Boolean = ( (options.contains('type_file) && options('type_file)) ||
+      (options.contains('type) && options[String]('type) == "f") )
+    val dir_only: Boolean = ( (options.contains('type_dir) && options('type_dir)) ||
+                  (options.contains('type) && options[String]('type) == "d") )
+    val ignore_binary: Boolean = options.contains('ignore_binary) && options('ignore_binary)
+    logger.debug("file_only: %s, dir_only: %s, ignore_binary: %s".format(file_only, dir_only, ignore_binary))
+
     val nameFilter = if(options.contains('case) && options('case))
         new util.matching.Regex(
           s"""^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
       else
         new util.matching.Regex(
           s"""(?i)^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
-    logger.debug(s"regex: %s" + nameFilter.toString)
+    logger.debug("regex: " + nameFilter.toString)
+
     FileUtils.get_matched_files(dir, nameFilter)( (filename, m) => {
-      if ( (options.contains('type_file) && options('type_file)) ||
-           (options.contains('type) && options[String]('type) == "f") ) {
+      logger.trace("file: " + filename)
+      if (file_only) {
+        logger.trace("file_only")
         if (filename.isFile) {
-          if(!(options.contains('ignore_binary) && options('ignore_binary) && filename.isBinary))
+          if(ignore_binary && !filename.isBinary)
+            f(filename, m)
+          else if (!ignore_binary)
             f(filename, m)
         }
-      } else if ( (options.contains('type_dir) && options('type_dir)) ||
-                  (options.contains('type) && options[String]('type) == "d") ) {
+      } else if (dir_only) {
+        logger.trace("dir_only")
         if (filename.isDirectory)
           f(filename, m)
       } else {
-        f(filename, m)
+        logger.trace("no file or dir filter specified")
+        if(ignore_binary && !filename.isBinary)
+          f(filename, m)
+        else if (!ignore_binary)
+          f(filename, m)
       }
 
     })
