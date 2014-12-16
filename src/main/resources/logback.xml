@@ -1,6 +1,7 @@
 <configuration debug="false">
   <property resource="logback.properties"/>
 
+  <!--
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender" level="debug">
     <file>logs/log.log</file>
       <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
@@ -13,10 +14,10 @@
           <maxFileSize>5MB</maxFileSize>
       </triggeringPolicy>
     <encoder>
-      <!-- <pattern>%date{YYYY&#45;MM&#45;dd HH:mm:ss} %level [%thread] %logger{10} [%file:%line] %msg%n</pattern> -->
       <pattern>${layout}</pattern>
     </encoder>
   </appender>
+  -->
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender" level="debug">
     <encoder>
@@ -29,7 +30,7 @@
   </logger>
 
   <root level="trace">
-    <appender-ref ref="FILE" />
+    <!-- <appender&#45;ref ref="FILE" /> -->
     <appender-ref ref="STDOUT" />
   </root>
 
