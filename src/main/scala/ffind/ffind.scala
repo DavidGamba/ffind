@@ -52,7 +52,7 @@ object FFind {
         "-f"              -> 'type_file,
         "-d"              -> 'type_dir,
         "-I"              -> 'ignore_binary,
-        "--hidden"        -> 'hidden,
+        "--hidden"        -> 'show_hidden,
         "--vcs"           -> 'vcs,
         "--full|fullpath" -> 'fullpath,
         "--color=s"       -> 'color
@@ -107,7 +107,8 @@ object FFind {
     val dir_only: Boolean = ( (options.contains('type_dir) && options('type_dir)) ||
                   (options.contains('type) && options[String]('type) == "d") )
     val ignore_binary: Boolean = options.contains('ignore_binary) && options('ignore_binary)
-    logger.debug("file_only: %s, dir_only: %s, ignore_binary: %s".format(file_only, dir_only, ignore_binary))
+    val show_hidden: Boolean = options.contains('show_hidden) && options('show_hidden)
+    logger.debug("file_only: %s, dir_only: %s, ignore_binary: %s, show_hidden: %s".format(file_only, dir_only, ignore_binary, show_hidden))
 
     val nameFilter = if(options.contains('case) && options('case))
         new util.matching.Regex(
@@ -117,7 +118,7 @@ object FFind {
           s"""(?i)^(.*?)($file_pattern)(.*)$$""", "pre", "matched", "post")
     logger.debug("regex: " + nameFilter.toString)
 
-    FileUtils.get_matched_files(dir, nameFilter)( (filename, m) => {
+    FileUtils.get_matched_files(dir, nameFilter, !show_hidden)( (filename, m) => {
       logger.trace("file: " + filename)
       if (file_only) {
         logger.trace("file_only")

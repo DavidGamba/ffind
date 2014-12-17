@@ -38,6 +38,20 @@ class FileUtilsTest extends FlatSpec with Matchers {
       new File("test_tree/a/B/c/D/e")
       )
     )
+    FileUtils.getFileTree(test_tree, true) should equal ( Stream(
+      new File("test_tree"),
+      new File("test_tree/A"),
+      new File("test_tree/A/b"),
+      new File("test_tree/A/b/C"),
+      new File("test_tree/A/b/C/d"),
+      new File("test_tree/A/b/C/d/E"),
+      new File("test_tree/a"),
+      new File("test_tree/a/B"),
+      new File("test_tree/a/B/c"),
+      new File("test_tree/a/B/c/D"),
+      new File("test_tree/a/B/c/D/e")
+      )
+    )
   }
 
   it should "match_files" in {
@@ -45,7 +59,6 @@ class FileUtilsTest extends FlatSpec with Matchers {
     val test_tree = new File("test_tree")
     val nameFilter = new util.matching.Regex(
           s"""(?i)^(.*?)(d)(.*)$$""", "pre", "matched", "post")
-    val files = FileUtils.getFileTree(test_tree)
     var results = ListBuffer[File]()
     FileUtils.match_files(test_tree, nameFilter)( (filename, m) =>
       m match {
@@ -58,6 +71,26 @@ class FileUtilsTest extends FlatSpec with Matchers {
     results should equal ( List(
       new File("test_tree/.a/B/c/D"),
       new File("test_tree/.A/b/C/d"),
+      new File("test_tree/A/b/C/d"),
+      new File("test_tree/a/B/c/D")
+    ))
+  }
+
+  it should "match_non_hidden_files" in {
+    // Location of the test directory structure
+    val test_tree = new File("test_tree")
+    val nameFilter = new util.matching.Regex(
+          s"""(?i)^(.*?)(d)(.*)$$""", "pre", "matched", "post")
+    var results = ListBuffer[File]()
+    FileUtils.match_files(test_tree, nameFilter, true)( (filename, m) =>
+      m match {
+        case Some(m) => {
+          results += filename
+        }
+        case None => {}
+      }
+    )
+    results should equal ( List(
       new File("test_tree/A/b/C/d"),
       new File("test_tree/a/B/c/D")
     ))

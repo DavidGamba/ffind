@@ -10,18 +10,28 @@ import scala.io.Source
 
 object FileUtils {
   // Returns a Stream of File under, and including, the given File.
-  def getFileTree(f: File): Stream[File] = f #:: Option(f.listFiles()).toStream.flatten.flatMap(getFileTree)
+  def getFileTree(f: File, ignore_hidden: Boolean = false): Stream[File] = {
+    f #:: Option(f.listFiles()).toStream.flatten.flatMap( x => {
+      Option(
+        // TODO: This doesn't feel like a very portable way of checking for hidden files.
+        if(ignore_hidden && x.getName.startsWith(".")) {
+          null
+        } else {
+          getFileTree(x)
+        }
+      ).toStream.flatten
+    })
+  }
 
   // Given a File (dir), a Regex, and a function of File and Regex.Match, runs the function on all files under the File.
-  def match_files(dir: File, nameFilter: util.matching.Regex)(f: (File, Option[scala.util.matching.Regex.Match]) => Unit) {
-    FileUtils.getFileTree(dir).foreach{ filename =>
+  def match_files(dir: File, nameFilter: util.matching.Regex, ignore_hidden: Boolean = false)(f: (File, Option[scala.util.matching.Regex.Match]) => Unit) {
+    FileUtils.getFileTree(dir, ignore_hidden).foreach{ filename =>
       f(filename, nameFilter findFirstMatchIn filename.getName)
     }
   }
-
   // Given a File (dir), a Regex, and a function of File and Regex.Match, runs the function on the files under File that match the given Regex.
-  def get_matched_files(dir: File, nameFilter: util.matching.Regex)(f: (File, scala.util.matching.Regex.Match) => Unit) {
-    match_files(dir, nameFilter)( (filename, m) =>
+  def get_matched_files(dir: File, nameFilter: util.matching.Regex, ignore_hidden: Boolean = false)(f: (File, scala.util.matching.Regex.Match) => Unit) {
+    match_files(dir, nameFilter, ignore_hidden)( (filename, m) =>
       m match {
         case Some(m) => {
           f(filename, m)
