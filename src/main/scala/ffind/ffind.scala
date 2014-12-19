@@ -25,6 +25,13 @@ object FFind {
               [--vcs]
               [--color <never|auto|always>]
 
+        ffind <dir> [<file_pattern>]
+              [ [-f] [-d] [--type <f|d>] ]
+              [--full|--full-path]
+              [--hidden]
+              [--vcs]
+              [--color <never|auto|always>]
+
         ffind [-h |-?]       # shows short help
         ffind [--help]       # shows the man page
 
@@ -45,8 +52,8 @@ object FFind {
     logger.info(s"ffind ${args.mkString(" ")}")
     val (options, remaining) = OptionParser.parse(args,
       Map(
-        "--help"          -> { () => show_man_page(); sys.exit(1) },
-        "-h"              -> { () => System.err.println(help_string); sys.exit(1) },
+        "--help=p"        -> { () => show_man_page(); sys.exit(1) },
+        "-h=p"            -> { () => System.err.println(help_string); sys.exit(1) },
         "--version=p"     -> { () => System.err.println(s"grepp version $version"); sys.exit(1) },
         "-c|--case"       -> 'case,
         "--type=s"        -> 'type,
@@ -74,17 +81,27 @@ object FFind {
       (remaining(1), new File(remaining(0)))
     } else {
       // TODO: Have it so it searches the full git repo by default
-      (remaining(0), new File("./"))
+      val f = new File(remaining(0))
+      if(f.exists && f.isDirectory)
+        ("", f)
+      else
+        (remaining(0), new File("./"))
     }
 
     logger.debug(s"file_pattern: $file_pattern")
     logger.debug(s"dir: $dir")
     ffind(file_pattern, dir, options)( (filename, m) => {
-        print(filename.getParent + "/")
-        print(m.group("pre"))
-        print(Console.RED + m.group("matched") + Console.RESET)
-        print(m.group("post"))
-        println()
+      val f = new File(filename.getAbsolutePath).getParent
+      if (filename.getParent != null) {
+        if(options.contains('fullpath) && options('fullpath))
+          print(f + "/")
+        else
+          print(filename.getParent + "/")
+      }
+      print(m.group("pre"))
+      print(Console.RED + m.group("matched") + Console.RESET)
+      print(m.group("post"))
+      println()
       }
     )
   }
