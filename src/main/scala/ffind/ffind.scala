@@ -15,6 +15,7 @@ object FFind {
   implicit def file2RichFile(file: File) = new FileUtils.RichFile(file)
 
   val logger = LoggerFactory.getLogger(this.getClass.getName)
+  val version = "0.1-dev"
 
   val help_string = """Usage:
         ffind [<dir>] <file_pattern>
@@ -46,7 +47,7 @@ object FFind {
       Map(
         "--help"          -> { () => show_man_page(); sys.exit(1) },
         "-h"              -> { () => System.err.println(help_string); sys.exit(1) },
-        "--version"       -> 'version,
+        "--version=p"     -> { () => System.err.println(s"grepp version $version"); sys.exit(1) },
         "-c|--case"       -> 'case,
         "--type=s"        -> 'type,
         "-f"              -> 'type_file,
