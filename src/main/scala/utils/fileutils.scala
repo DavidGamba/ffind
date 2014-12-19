@@ -10,11 +10,12 @@ import scala.io.Source
 
 object FileUtils {
   // Returns a Stream of File under, and including, the given File.
-  def getFileTree(f: File, ignore_hidden: Boolean = false): Stream[File] = {
+  def getFileTree(f: File, ignore_starts: List[String] = List(), ignore_equals: List[String] = List()): Stream[File] = {
     f #:: Option(f.listFiles()).toStream.flatten.flatMap( x => {
       Option(
-        // TODO: This doesn't feel like a very portable way of checking for hidden files.
-        if(ignore_hidden && x.getName.startsWith(".")) {
+        if(ignore_starts.filter( e => x.getName.startsWith(e) ).size >= 1) {
+          null
+        } else if(ignore_equals.filter( e => e == x.getName ).size >= 1) {
           null
         } else {
           getFileTree(x)
@@ -24,14 +25,14 @@ object FileUtils {
   }
 
   // Given a File (dir), a Regex, and a function of File and Regex.Match, runs the function on all files under the File.
-  def match_files(dir: File, nameFilter: util.matching.Regex, ignore_hidden: Boolean = false)(f: (File, Option[scala.util.matching.Regex.Match]) => Unit) {
-    FileUtils.getFileTree(dir, ignore_hidden).foreach{ filename =>
+  def match_files(dir: File, nameFilter: util.matching.Regex, ignore_starts: List[String] = List(), ignore_equals: List[String] = List())(f: (File, Option[scala.util.matching.Regex.Match]) => Unit) {
+    FileUtils.getFileTree(dir, ignore_starts, ignore_equals).foreach{ filename =>
       f(filename, nameFilter findFirstMatchIn filename.getName)
     }
   }
   // Given a File (dir), a Regex, and a function of File and Regex.Match, runs the function on the files under File that match the given Regex.
-  def get_matched_files(dir: File, nameFilter: util.matching.Regex, ignore_hidden: Boolean = false)(f: (File, scala.util.matching.Regex.Match) => Unit) {
-    match_files(dir, nameFilter, ignore_hidden)( (filename, m) =>
+  def get_matched_files(dir: File, nameFilter: util.matching.Regex, ignore_starts: List[String] = List(), ignore_equals: List[String] = List())(f: (File, scala.util.matching.Regex.Match) => Unit) {
+    match_files(dir, nameFilter, ignore_starts, ignore_equals)( (filename, m) =>
       m match {
         case Some(m) => {
           f(filename, m)
