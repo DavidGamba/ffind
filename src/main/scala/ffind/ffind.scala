@@ -75,9 +75,6 @@ object FFind {
     }
     val (file_pattern, dir) = if (remaining.size >= 2) {
       // If given dir has an absolute path then print result as absolute path
-      if (remaining(0).startsWith("/")) {
-        // options('fullpath -> true)
-      }
       (remaining(1), new File(remaining(0)))
     } else {
       // TODO: Have it so it searches the full git repo by default
@@ -91,7 +88,7 @@ object FFind {
     logger.debug(s"file_pattern: $file_pattern")
     logger.debug(s"dir: $dir")
     ffind(file_pattern, dir, options)( (filename, m) => {
-      val f = new File(filename.getAbsolutePath).getParent
+      val f = new File(filename.getAbsolutePath).getParent.replace("/./", "/")
       if (filename.getParent != null) {
         if(options.contains('fullpath) && options('fullpath))
           print(f + "/")
