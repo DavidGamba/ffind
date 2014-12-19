@@ -96,7 +96,10 @@ object FFind {
           print(filename.getParent + "/")
       }
       print(m.group("pre"))
-      print(Console.RED + m.group("matched") + Console.RESET)
+      if(options.contains('color) && options[String]('color) == "never")
+        print(m.group("matched"))
+      else
+        print(Console.RED + m.group("matched") + Console.RESET)
       print(m.group("post"))
       println()
       }
