@@ -18,14 +18,14 @@ object FFind {
   val version = "0.1-dev"
 
   val help_string = """Usage:
-        ffind [<dir>] <file_pattern>
+        ffind [<dir>] <file_pattern> [-c] [-I]
               [ [-f] [-d] [--type <f|d>] ]
               [--full|--full-path]
               [--hidden]
               [--vcs]
               [--color <never|auto|always>]
 
-        ffind <dir> [<file_pattern>]
+        ffind <dir> [<file_pattern>] [-c] [-I]
               [ [-f] [-d] [--type <f|d>] ]
               [--full|--full-path]
               [--hidden]
@@ -49,7 +49,6 @@ object FFind {
   }
 
   def run(args: Array[String]) {
-    logger.info(s"ffind ${args.mkString(" ")}")
     val (options, remaining) = OptionParser.parse(args,
       Map(
         "--help=p"        -> { () => show_man_page(); sys.exit(1) },
