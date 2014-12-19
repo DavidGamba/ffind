@@ -71,6 +71,7 @@ object FFind {
 
     if (remaining.size < 1) {
       System.err.println("[ERROR] Missing file_pattern!")
+      System.err.println(help_string)
       sys.exit(1)
     }
     val (file_pattern, dir) = if (remaining.size >= 2) {
