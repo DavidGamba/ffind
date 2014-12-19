@@ -11,6 +11,8 @@ import scala.io.Source
 object FileUtils {
   // Returns a Stream of File under, and including, the given File.
   def getFileTree(f: File, ignore_starts: List[String] = List(), ignore_equals: List[String] = List()): Stream[File] = {
+    if(!f.exists)
+      return Stream()
     f #:: Option(f.listFiles()).toStream.flatten.flatMap( x => {
       Option(
         if(ignore_starts.filter( e => x.getName.startsWith(e) ).size >= 1) {
