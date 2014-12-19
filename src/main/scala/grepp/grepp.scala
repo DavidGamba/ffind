@@ -17,12 +17,17 @@ import java.io.IOException
 object Grepp {
 
   val logger = LoggerFactory.getLogger(this.getClass.getName)
+  val version = "0.1-dev"
 
   val help_string = """Usage:
 
-  grepp [-c] [-l] [-I] [-n] *pattern* [[dir] *file_pattern*] [--fullpath]
-        [-r *replace*]
+  grepp <pattern> [[<dir>] [<file_pattern>]]
+        [-c] [-l] [-I] [-n]
+        [-r *replace* [-f|--force]]
         [--color *never*|*auto*|*always*]
+        [--full|--full-path] [--hidden] [--vcs] [--fc|file-case]
+
+  Not implemented
         [-v | --ignore *file_pattern*]
         [--spacing]
         [--pp|--prerocessor *program* --ppo *program options after filename*]
@@ -44,20 +49,22 @@ object Grepp {
   }
 
   def run(args: Array[String]) {
-    logger.info(s"grepp ${args.mkString(" ")}")
+    logger.debug(s"grepp version $version")
+    logger.debug(s"grepp ${args.mkString(" ")}")
     val (options, remaining) = OptionParser.parse(args,
       Map(
         "--help=p"        -> { () => show_man_page(); sys.exit(1) },
         "-h=p"            -> { () => System.err.println(help_string); sys.exit(1) },
-        "--version"       -> 'version,
+        "--version=p"     -> { () => System.err.println(s"grepp version $version"); sys.exit(1) },
         "-c|--case"       -> 'case,
         "-I"              -> 'binary,
         "-n"              -> 'number,
-        "-f"              -> 'force,
+        "-f|--force"      -> 'force,
         "-r=s"            -> 'replace,
-        "--hidden"        -> 'hidden,
+        "--hidden"        -> 'show_hidden,
         "--vcs"           -> 'vcs,
         "--full|fullpath" -> 'fullpath,
+        "--fc|file-case"  -> 'file_case,
         "--type=s"        -> 'type,
         "--color=s"       -> 'color
       )
@@ -69,17 +76,22 @@ object Grepp {
       System.err.println("[ERROR] Missing pattern!")
       sys.exit(1)
     }
+    // grepp pattern
     val (pattern, file_pattern, dir) = if (remaining.size == 1) {
       // TODO: Have it so it searches the full git repo by default
-      (remaining(0), ".*", new File("./"))
+      (remaining(0), "", new File("./"))
+    // grepp pattern dir
+    // or
+    // grepp pattern file_pattern
     } else if (remaining.size == 2) {
       // TODO: Have it so it searches the full git repo by default
-      (remaining(0), remaining(1), new File("./"))
+      val f = new File(remaining(1))
+      if(f.exists && f.isDirectory)
+        (remaining(0), "", f)
+      else
+        (remaining(0), remaining(1), new File("./"))
+    // grepp pattern dir file_pattern
     } else {
-      // If given dir has an absolute path then print result as absolute path
-      if (remaining(1).startsWith("/")) {
-        // options('fullpath -> true)
-      }
       (remaining(0), remaining(2), new File(remaining(1)))
     }
 
@@ -93,7 +105,13 @@ object Grepp {
         new util.matching.Regex(
           s"""(?i)(.*?)($pattern)""", "pre", "matched")
     logger.debug(s"regex: %s" + patternFilter.toString)
-    val ffind_options = OptionMap('type_file -> true, 'ignore_binary -> true)
+    val ffind_options = OptionMap(
+      'type_file -> true,
+      'ignore_binary -> true,
+      'show_hidden -> (options.contains('show_hidden) && options('show_hidden)),
+      'case -> (options.contains('file_case) && options('file_case)),
+      'vcs -> (options.contains('vcs) && options('vcs))
+    )
 
     // TODO: Refactor this code repetition before it gets out of control
     if(options.contains('replace)) {
@@ -102,8 +120,14 @@ object Grepp {
         val fw = new FileWriter(tmp, false)
         val bw = new BufferedWriter(fw)
         FileUtils.match_lines_in_file(filename, patternFilter)( (line, matches) => {
-          // filename
-          print(Console.MAGENTA + filename.getParent + "/")
+          val f = new File(filename.getAbsolutePath).getParent.replace("/./", "/")
+          print(Console.MAGENTA)
+          if (filename.getParent != null) {
+            if(options.contains('fullpath) && options('fullpath))
+              print(f + "/")
+            else
+              print(filename.getParent + "/")
+          }
           print(m.group("pre"))
           print(Console.BLUE + Console.BOLD + m.group("matched") + Console.RESET)
           print(Console.MAGENTA + m.group("post") + Console.RESET + " : ")
@@ -124,16 +148,24 @@ object Grepp {
           })
         bw.close
         fw.close
-        if(options.contains('force) && options('force))
+        if(options.contains('force) && options('force)) {
+          logger.debug("copy " + tmp.toPath + " " + filename.toPath)
           Files.copy(tmp.toPath, filename.toPath, StandardCopyOption.REPLACE_EXISTING)
+        }
       }
       )
     }
     else {
       FFind.ffind(file_pattern, dir, ffind_options)( (filename, m) => {
           FileUtils.match_lines_in_file(filename, patternFilter)( (line, matches) => {
-            // filename
-            print(Console.MAGENTA + filename.getParent + "/")
+            val f = new File(filename.getAbsolutePath).getParent.replace("/./", "/")
+            print(Console.MAGENTA)
+            if (filename.getParent != null) {
+              if(options.contains('fullpath) && options('fullpath))
+                print(f + "/")
+              else
+                print(filename.getParent + "/")
+            }
             print(m.group("pre"))
             print(Console.BLUE + Console.BOLD + m.group("matched") + Console.RESET)
             print(Console.MAGENTA + m.group("post") + Console.RESET + " : ")
