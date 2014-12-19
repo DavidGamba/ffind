@@ -20,7 +20,7 @@ object FileUtils {
         } else if(ignore_equals.filter( e => e == x.getName ).size >= 1) {
           null
         } else {
-          getFileTree(x)
+          getFileTree(x, ignore_starts, ignore_equals)
         }
       ).toStream.flatten
     })
