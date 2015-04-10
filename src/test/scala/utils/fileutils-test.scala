@@ -13,21 +13,21 @@ class FileUtilsTest extends FlatSpec with Matchers {
     // FileUtils.getFileTree(test_tree).foreach{ filename =>
     //   println( "new File(\"" + filename + "\")" + "," )
     // }
-    FileUtils.getFileTree(test_tree) should equal ( Stream(
+    FileUtils.getFileTree(test_tree).sortBy(_.getPath()) should equal ( Stream(
       new File("test_tree"),
-      new File("test_tree/.a"),
-      new File("test_tree/.a/B"),
-      new File("test_tree/.a/B/c"),
-      new File("test_tree/.a/B/c/D"),
-      new File("test_tree/.a/B/c/D/e"),
       new File("test_tree/.A"),
       new File("test_tree/.A/b"),
       new File("test_tree/.A/b/C"),
       new File("test_tree/.A/b/C/d"),
       new File("test_tree/.A/b/C/d/E"),
+      new File("test_tree/.a"),
+      new File("test_tree/.a/B"),
+      new File("test_tree/.a/B/c"),
+      new File("test_tree/.a/B/c/D"),
+      new File("test_tree/.a/B/c/D/e"),
       new File("test_tree/.svn"),
-      new File("test_tree/.svn/e"),
       new File("test_tree/.svn/E"),
+      new File("test_tree/.svn/e"),
       new File("test_tree/A"),
       new File("test_tree/A/b"),
       new File("test_tree/A/b/C"),
@@ -43,7 +43,7 @@ class FileUtilsTest extends FlatSpec with Matchers {
   }
   it should "getFileTree without hidden files" in {
     val test_tree = new File("test_tree")
-    FileUtils.getFileTree(test_tree, List(".")) should equal ( Stream(
+    FileUtils.getFileTree(test_tree, List(".")).sortBy(_.getPath()) should equal ( Stream(
       new File("test_tree"),
       new File("test_tree/A"),
       new File("test_tree/A/b"),
@@ -60,7 +60,7 @@ class FileUtilsTest extends FlatSpec with Matchers {
   }
   it should "getFileTree without hidden files and without equals list" in {
     val test_tree = new File("test_tree")
-    FileUtils.getFileTree(test_tree, List("."), List("a")) should equal ( Stream(
+    FileUtils.getFileTree(test_tree, List("."), List("a")).sortBy(_.getPath()) should equal ( Stream(
       new File("test_tree"),
       new File("test_tree/A"),
       new File("test_tree/A/b"),
@@ -72,21 +72,21 @@ class FileUtilsTest extends FlatSpec with Matchers {
   }
   it should "getFileTree without equals list" in {
     val test_tree = new File("test_tree")
-    FileUtils.getFileTree(test_tree, List(), List("a")) should equal ( Stream(
+    FileUtils.getFileTree(test_tree, List(), List("a")).sortBy(_.getPath()) should equal ( Stream(
       new File("test_tree"),
-      new File("test_tree/.a"),
-      new File("test_tree/.a/B"),
-      new File("test_tree/.a/B/c"),
-      new File("test_tree/.a/B/c/D"),
-      new File("test_tree/.a/B/c/D/e"),
       new File("test_tree/.A"),
       new File("test_tree/.A/b"),
       new File("test_tree/.A/b/C"),
       new File("test_tree/.A/b/C/d"),
       new File("test_tree/.A/b/C/d/E"),
+      new File("test_tree/.a"),
+      new File("test_tree/.a/B"),
+      new File("test_tree/.a/B/c"),
+      new File("test_tree/.a/B/c/D"),
+      new File("test_tree/.a/B/c/D/e"),
       new File("test_tree/.svn"),
-      new File("test_tree/.svn/e"),
       new File("test_tree/.svn/E"),
+      new File("test_tree/.svn/e"),
       new File("test_tree/A"),
       new File("test_tree/A/b"),
       new File("test_tree/A/b/C"),
@@ -110,9 +110,9 @@ class FileUtilsTest extends FlatSpec with Matchers {
         case None => {}
       }
     )
-    results should equal ( List(
-      new File("test_tree/.a/B/c/D"),
+    results.sortBy(_.getPath()) should equal ( List(
       new File("test_tree/.A/b/C/d"),
+      new File("test_tree/.a/B/c/D"),
       new File("test_tree/A/b/C/d"),
       new File("test_tree/a/B/c/D")
     ))
@@ -132,7 +132,7 @@ class FileUtilsTest extends FlatSpec with Matchers {
         case None => {}
       }
     )
-    results should equal ( List(
+    results.sortBy(_.getPath()) should equal ( List(
       new File("test_tree/A/b/C/d"),
       new File("test_tree/a/B/c/D")
     ))
