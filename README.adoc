@@ -4,78 +4,136 @@ David Gamba, davidgamba at gmail.com
 
 == NAME
 
-ffind - Fast Regex Find, faster common Find searches using the power of Perl's Regex engine 
+ffind - Fast Regex Find, faster common Find searches using the power of Golang’s Regex engine
 
 == SYNOPSIS
 
- # Search for files using regex::
-*ffind* ['dir'] 'file_pattern'
-        [ [*-f*] | [*-d*] | [*--type* 'f'|'d'] ]
-        [*-c*|*--case*]
-        [*--full*|*--full-path*]
-        [*--hidden*]
-        [*--vcs*]
-        [*--color* 'never'|'auto'|'always']
+ # List all files under current dir::
+*ffind* ['OPTIONS'...]
+
+ # List file_pattern matching files under current dir::
+ # <file_pattern> can't end in /::
+*ffind* 'file_pattern' ['OPTIONS'...]
+
+ # List file pattern matching files under given dir::
+*ffind* 'file_pattern' 'dir' ['OPTIONS'...]
+
+ # List all files under given dir::
+*ffind* 'dir/' ['OPTIONS'...]
+
+ # List file pattern matching files under given dir::
+*ffind* 'dir/' 'file_pattern' ['OPTIONS'...]
+
+ # OPTIONS::
+[*-c*|*--case*]
++
+[*-t*|*--type* 'f|d|filetype']...
++
+[*-T*|*--no-type* 'filetype']...
++
+[*-e*|*--extension* 'extensionToMatch']...
++
+[*-E*|*--no-extension* 'extensionToIgnore']...
++
+[*--no-follow*]
++
+[*--abs*|*--abs-path*]
++
+[*--num-sort*]
++
+[*--hidden*]
++
+[*--vcs*] # Sets --hidden when set
++
+[*--verbose*]
+
+ # Show type list::
+*ffind* *--type-list*|*--typelist*
 
  # Show version number::
 *ffind* *--version*
 
- # show synopsis only::
-*ffind* *-h*
+ # Show short help::
+*ffind* *-h*|*-?*|*--help*
 
- # show man page::
-*ffind* *--help*
+
+=== TODO
+
+[*--color* 'never'|'auto'|'always']
+
 
 == DESCRIPTION
 
-This command focuses on the most common find searches. They are optimized for typing speed as not to interrupt your thought process.
+This command focuses on the most common find searches.
+They are optimized for typing speed as not to interrupt your thought process.
 
-Instead of typing "find . -iname \'\*pattern*\'" or "find -regextype subpar_type -regex \'^.\*?pattern.*$'" you can simply type "ffind pattern".
+Instead of typing "find . -iname \'\*pattern*\'" or "find -regextype some_type -regex \'^.\*?pattern.*$'" you can simply type "ffind pattern".
 
-More obscure searches are probably better suited to find, however find's regex engine is subpar compared to Perl's so...
+More obscure searches are probably better suited to find, but you have to deal with that syntax so...
 
-This command is also only intended to search for files, once you find them, pipe the output if you want to excecute a command on them.
+This command is also only intended to search for files, once you find them, pipe the output if you want to execute a command on them.
 
 == OPTIONS
 
 'dir'::
-Directory to search from. Defaults to current working directory.
+Directory to search from.
+Defaults to current working directory.
 
 'file_pattern'::
-Pattern to search for (In regex syntax). Use single quotes to avoid shell expansion.
-
-*-f*::
-Show only results of type file.
-
-*-d*::
-Show only results of type dir.
-
-*--type* 'f'|'d'::
-Show only results of given type ('f' for file and 'd' for dir).
+Pattern to search for (In regex syntax).
+Use single quotes to avoid shell expansion.
 
 *-c*|*--case*::
-Match case sensitive. Default is to match case insensitive.
+Match case sensitive.
+Default is to match case insensitive.
 
-*--full*|*--full-path*::
-Print full path to file. Defaults to printing relative path.
+*-t*|*--type* 'f'|'d'|'filetype'::
+Show only results of given type.
+'f' for file and 'd' for dir or any of the *--type-list* types.
+
+*-T*|*--no-type* filetype'::
+Skip results of given type from any of the *--type-list* types.
+
+*-e*|*--extension* 'extensionToMatch'::
+Include file results that end in the given 'extension'.
+
+*-E*|*--no-extension* 'extensionToIgnore'::
+Exclude file results that end in the given 'extension'.
+
+*--no-follow*::
+Do not follow symlinks.
+Avoid infinite recursion.
+
+*--abs*|*--abs-path*::
+Print absolute path to file.
+Defaults to printing relative path.
+
+*--num-sort*::
+When there are directories that fully match a number, sort them numerically.
 
 *--hidden*::
 Show hidden files (starting with dot ".").
 
 *--vcs*::
-Do not ignore git and subversion directories.
+Do not ignore git, subversion or mercurial directories.
 
-*--color* 'never'|'auto'|'always'::
-Select color use: never, auto (default), always
+*--verbose*::
+Show options in effect.
+
+*--type-list*|*--typelist*::
+Show type list keys and matching patterns.
 
 *--version*::
-Show version number
+Show version.
 
-*-h*::
-Show synopsis only
+*-h*|*-?*|*--help*::
+Show short help.
 
-*--help*::
-Show man page
+=== TODO
+
+*--color* 'never'|'auto'|'always'::
+Select color use: 'never', 'auto' (default), 'always'.
+
 
 == EXAMPLES
 
@@ -83,31 +141,29 @@ Search for a file or directory with the word info in its name::
 ffind info
 
 Search for a file with the word info in its filename::
-ffind info -f
+ffind info -t f
 
 Search for a directory with the word info in its dirname::
-ffind info -d
+ffind info -t d
 
 Search in your home dir for a file or directory with the word info in its name::
-ffind ~ info
+ffind info +'~'+
 
 == ROADMAP
-
-*-v*|*--invert-match*::
-Invert the sense of matching, to select non-matching files.
-
-*--no-ln*|*--no-symlinks*::
-Do not follow symlinks. Avoid infinite recursion.
-
-Fuzzy searches::
-Adding *fstrcmp* fuzzy search engine might be useful. Though one could simple put .* in between every char in the pattern.
 
 Limit depth option::
 Might need to add this for large projects.
 
+Parallel execution::
+Will not return sorted results but will speed up response.
+
+Version Sort::
+Only numerical sort is implemented (the whole filename is a number).
+Look into providing version sort for filenames.
+
 == VERSION
 
-0.3
+0.4
 
 == SOURCE CODE
 
@@ -115,4 +171,10 @@ github: https://github.com/DavidGamba/ffind
 
 == LICENSE
 
-Copyright (C) 2014 David Gamba. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+This file is part of ffind.
+
+Copyright (C) 2017  David Gamba Rios
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
