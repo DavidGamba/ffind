@@ -19,6 +19,8 @@ view:
 
 doc:
 	asciidoctor README.adoc
+
+man:
 	asciidoctor -b manpage ffind.adoc
 
 open:
