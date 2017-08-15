@@ -11,6 +11,11 @@ BUILD_FLAGS=-ldflags="-X github.com/DavidGamba/ffind/semver.BuildMetadata=`git r
 test:
 	go test ./...
 
+debug:
+	pwd; \
+	echo ${GOPATH}; \
+	ls **;
+
 deps:
 	go get github.com/DavidGamba/go-getoptions
 
