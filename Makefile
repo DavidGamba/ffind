@@ -11,6 +11,9 @@ BUILD_FLAGS=-ldflags="-X github.com/DavidGamba/ffind/semver.BuildMetadata=`git r
 test:
 	go test ./...
 
+deps:
+	go get github.com/DavidGamba/go-getoptions
+
 cover:
 	go test -coverprofile=c.out -covermode=atomic github.com/DavidGamba/ffind/lib/ffind
 
@@ -31,3 +34,9 @@ build:
 
 install:
 	go install $(BUILD_FLAGS) ffind.go
+
+rpm:
+	rpmbuild -bb rpm.spec \
+		--define '_rpmdir ./RPMS' \
+		--define '_sourcedir ${PWD}' \
+		--buildroot ${PWD}/buildroot
