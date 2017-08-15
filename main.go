@@ -48,9 +48,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/davidgamba/ffind/lib/ffind"
-	"github.com/davidgamba/ffind/semver"
-	"github.com/davidgamba/go-getoptions"
+	"github.com/DavidGamba/ffind/lib/ffind"
+	"github.com/DavidGamba/ffind/semver"
+	"github.com/DavidGamba/go-getoptions"
 )
 
 func synopsis() {

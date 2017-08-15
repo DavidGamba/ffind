@@ -1,5 +1,5 @@
 = ffind(1)
-David Gamba, davidgamba at gmail.com
+David Gamba, DavidGamba at gmail.com
 :doctype: manpage
 
 == NAME
