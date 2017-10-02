@@ -36,7 +36,6 @@ For example: '.rb' and '.erb' for ruby files.
 package ffind
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -51,10 +50,10 @@ type FileError struct {
 
 // NewFileError - Given a filepath returns a FileError struct.
 func NewFileError(path string) (*FileError, error) {
-	log.Printf("NewFileError: %s", path)
+	logger.Printf("NewFileError: %s", path)
 	fInfo, err := os.Lstat(path)
 	if err != nil {
-		log.Printf("NewFileError ERROR: %s", err)
+		logger.Printf("NewFileError ERROR: %s", err)
 		if os.IsNotExist(err) {
 			// Clean up error context
 			err = os.ErrNotExist
@@ -78,7 +77,7 @@ func (fe *FileError) IsSymlink() bool {
 func ReadDirNoSort(dirname string) ([]os.FileInfo, error) {
 	f, err := os.Open(dirname)
 	if err != nil {
-		log.Printf("ReadDirNoSort ERROR: %s", err)
+		logger.Printf("ReadDirNoSort ERROR: %s", err)
 		if os.IsPermission(err) {
 			// Clean up error context to make the output nicer
 			err = os.ErrPermission
@@ -114,12 +113,12 @@ func listOneLevel(
 	sortFn SortFn) <-chan FileError {
 	fInfo := fe.FileInfo
 	file := fe.Path
-	log.Printf("file: %s\n", file)
+	logger.Printf("file: %s\n", file)
 	c := make(chan FileError)
 	go func() {
 		// Check for error
 		if fe.Error != nil {
-			log.Printf("listOneLevel entry error: %s", fe.Error.Error())
+			logger.Printf("listOneLevel entry error: %s", fe.Error.Error())
 			c <- *fe
 			close(c)
 			return
@@ -127,10 +126,10 @@ func listOneLevel(
 		// Check if file is symlink.
 		nfe := fe
 		if fe.IsSymlink() && follow {
-			log.Printf("\tIsSymlink: %s", file)
+			logger.Printf("\tIsSymlink: %s", file)
 			eval, err := filepath.EvalSymlinks(fe.Path)
 			if err != nil {
-				log.Printf("EvalSymlinks error: %s", err)
+				logger.Printf("EvalSymlinks error: %s", err)
 				// TODO: Clean up error description
 				fe.Error = err
 				c <- *fe
@@ -140,16 +139,16 @@ func listOneLevel(
 			nfe, err = NewFileError(eval)
 			// TODO: Figure out how to add a test for this!
 			if err != nil {
-				log.Printf("NewFileError error: %s", err)
+				logger.Printf("NewFileError error: %s", err)
 				fe.Error = err
 				c <- *fe
 				close(c)
 				return
 			}
-			log.Printf("\tSymlink: %s", nfe.Path)
+			logger.Printf("\tSymlink: %s", nfe.Path)
 		}
 		if nfe.FileInfo.IsDir() {
-			log.Printf("\tDir: %s\n", fInfo.Name())
+			logger.Printf("\tDir: %s\n", fInfo.Name())
 			fileMatches, err := ReadDirNoSort(file)
 			if err != nil {
 				c <- FileError{fInfo, filepath.Join(filepath.Dir(file), fInfo.Name()), err}
@@ -159,7 +158,7 @@ func listOneLevel(
 			sortFn(fileMatches)
 			for _, fm := range fileMatches {
 				c <- FileError{fm, filepath.Join(filepath.Clean(file), fm.Name()), err}
-				log.Printf("\tFile: %s\n", fm.Name())
+				logger.Printf("\tFile: %s\n", fm.Name())
 			}
 			close(c)
 			return
@@ -191,17 +190,17 @@ func listRecursive(fe *FileError, follow bool, s FileMatcher, sortFn SortFn) <-c
 	c := make(chan FileError)
 	go func() {
 		if fe.Error != nil {
-			log.Printf("\tError received: %s", fe.Error)
+			logger.Printf("\tError received: %s", fe.Error)
 			c <- *fe
 			close(c)
 			return
 		}
-		log.Printf("Query: %s", fe.Path)
+		logger.Printf("Query: %s", fe.Path)
 		ch := listOneLevel(fe, follow, sortFn)
 		for e := range ch {
-			log.Printf("\tReceived: %s", e.FileInfo.Name())
+			logger.Printf("\tReceived: %s", e.FileInfo.Name())
 			if e.Error != nil {
-				log.Printf("\tError received: %s", e.Error)
+				logger.Printf("\tError received: %s", e.Error)
 				c <- e
 				continue
 			}
@@ -210,10 +209,10 @@ func listRecursive(fe *FileError, follow bool, s FileMatcher, sortFn SortFn) <-c
 			ne := &e
 			checkSymlink := func() {
 				if e.IsSymlink() && follow {
-					log.Printf("\tIsSymlink: %s", e.Path)
+					logger.Printf("\tIsSymlink: %s", e.Path)
 					eval, err := filepath.EvalSymlinks(e.Path)
 					if err != nil {
-						log.Printf("\tEvalSymlinks error: %s", err)
+						logger.Printf("\tEvalSymlinks error: %s", err)
 						// If the link is broken then just return the original file
 						if os.IsNotExist(err) {
 							return
@@ -223,11 +222,11 @@ func listRecursive(fe *FileError, follow bool, s FileMatcher, sortFn SortFn) <-c
 					}
 					ne, err = NewFileError(eval)
 					if err != nil {
-						log.Printf("\tNew Error received: %s", err)
+						logger.Printf("\tNew Error received: %s", err)
 						e.Error = err
 						return
 					}
-					log.Printf("\tSymlink: %s", ne.Path)
+					logger.Printf("\tSymlink: %s", ne.Path)
 				}
 			}
 			checkSymlink()
@@ -238,12 +237,12 @@ func listRecursive(fe *FileError, follow bool, s FileMatcher, sortFn SortFn) <-c
 					continue
 				}
 				if !s.SkipDirResults() {
-					log.Printf("DIR: %s - %s", e.Path, ne.Path)
+					logger.Printf("DIR: %s - %s", e.Path, ne.Path)
 					c <- e
 				}
 				cr := listRecursive(&e, follow, s, sortFn)
 				for e := range cr {
-					log.Printf("Recurse: %s", e.Path)
+					logger.Printf("Recurse: %s", e.Path)
 					c <- e
 				}
 			} else {
@@ -251,7 +250,7 @@ func listRecursive(fe *FileError, follow bool, s FileMatcher, sortFn SortFn) <-c
 				if s.SkipFileResults() || s.SkipFileName(e.FileInfo.Name()) {
 					continue
 				}
-				log.Printf("Else: %s", e.Path)
+				logger.Printf("Else: %s", e.Path)
 				if s.MatchFileName(e.FileInfo.Name()) {
 					c <- e
 				}
@@ -270,7 +269,7 @@ func listRecursive(fe *FileError, follow bool, s FileMatcher, sortFn SortFn) <-c
 // 	myWalkFn := func(path string, info os.FileInfo, err error) error {
 // 		// walkFn is called with the root itself.
 // 		// Ignore the root unless it is a file.
-// 		log.Printf("result: %s", path)
+// 		logger.Printf("result: %s", path)
 // 		if err != nil {
 // 			fmt.Fprintf(os.Stderr, "ERROR: '%s' %s\n", path, err)
 // 			if path == dir && strings.Contains(err.Error(), "no such file or directory") {
@@ -301,15 +300,15 @@ func listRecursive(fe *FileError, follow bool, s FileMatcher, sortFn SortFn) <-c
 func ListRecursiveWalk(root string, follow bool, s FileMatcher, walkFn filepath.WalkFunc) error {
 	var listRecursiveWalkFunc filepath.WalkFunc
 	listRecursiveWalkFunc = func(path string, info os.FileInfo, pathErr error) error {
-		log.Printf("listRecursiveWalkFunc Path: %s", path)
+		logger.Printf("listRecursiveWalkFunc Path: %s", path)
 		if pathErr != nil {
-			log.Printf("walkFunc error: %s", pathErr)
+			logger.Printf("walkFunc error: %s", pathErr)
 			if strings.Contains(pathErr.Error(), "no such file or directory") {
 				return walkFn(path, info, pathErr)
 			}
 		}
 		if info.IsDir() {
-			log.Printf("listRecursiveWalkFunc isDir: %s", info.Name())
+			logger.Printf("listRecursiveWalkFunc isDir: %s", info.Name())
 			// TODO: Make sure to test SkipDirName
 			if s.SkipDirName(info.Name()) {
 				return filepath.SkipDir
@@ -318,7 +317,7 @@ func ListRecursiveWalk(root string, follow bool, s FileMatcher, walkFn filepath.
 				return pathErr
 			}
 		} else {
-			log.Printf("listRecursiveWalkFunc isFile: %s", info.Name())
+			logger.Printf("listRecursiveWalkFunc isFile: %s", info.Name())
 			// TODO: Make sure to test SkipFileName
 			if s.SkipFileResults() || s.SkipFileName(info.Name()) {
 				return pathErr
@@ -344,10 +343,10 @@ func SymlinkWalk(root string, follow bool, walkFn filepath.WalkFunc) error {
 	var symlinkEval string
 
 	symlinkWalkFunc = func(path string, info os.FileInfo, pathErr error) error {
-		log.Printf("Path: %s", path)
+		logger.Printf("Path: %s", path)
 		// Log the incomming error. Might want to handle this later on.
 		if pathErr != nil {
-			log.Printf("walkFunc error: %s", pathErr)
+			logger.Printf("walkFunc error: %s", pathErr)
 			if strings.Contains(pathErr.Error(), "no such file or directory") {
 				return walkFn(path, info, pathErr)
 			}
@@ -356,14 +355,14 @@ func SymlinkWalk(root string, follow bool, walkFn filepath.WalkFunc) error {
 		// have the symlinkRoot as base.
 		if symlinkEval != "" {
 			path = strings.Replace(path, symlinkEval, symlinkRoot, 1)
-			log.Printf("new path: %s", path)
+			logger.Printf("new path: %s", path)
 		}
 		if follow && info.Mode()&os.ModeSymlink != 0 {
-			log.Printf("IsSymlink: %s", path)
+			logger.Printf("IsSymlink: %s", path)
 			var err error // Make sure we are writing the external symlinkEval
 			symlinkEval, err = filepath.EvalSymlinks(path)
 			if err != nil {
-				log.Printf("EvalSymlinks error: %s", err)
+				logger.Printf("EvalSymlinks error: %s", err)
 				// If the link is broken then just return the original file
 				if strings.Contains(err.Error(), "no such file or directory") {
 					return walkFn(path, info, pathErr)
@@ -374,13 +373,13 @@ func SymlinkWalk(root string, follow bool, walkFn filepath.WalkFunc) error {
 			// Open the evaluated symlink to see if it is a dir.
 			symlink, err := os.Open(symlinkEval)
 			if err != nil {
-				log.Printf("Open error: %s", err)
+				logger.Printf("Open error: %s", err)
 				return walkFn(path, info, err)
 			}
 			defer symlink.Close()
 			sInfo, err := symlink.Stat()
 			if err != nil {
-				log.Printf("Stat error: %s", err)
+				logger.Printf("Stat error: %s", err)
 				return walkFn(path, info, err)
 			}
 			// If the symlink is not a dir, return the path with the original error.
@@ -390,7 +389,7 @@ func SymlinkWalk(root string, follow bool, walkFn filepath.WalkFunc) error {
 			}
 			symlink.Close()
 			symlinkRoot = path
-			log.Printf("symlinkEval: %s, symlinkRoot: %s", symlinkEval, symlinkRoot)
+			logger.Printf("symlinkEval: %s, symlinkRoot: %s", symlinkEval, symlinkRoot)
 			// Record the current path as the symlinkRoot to make results relative to this path.
 			err = filepath.Walk(symlinkEval, symlinkWalkFunc)
 			// Clean Up

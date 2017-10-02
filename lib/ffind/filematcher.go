@@ -9,7 +9,6 @@
 package ffind
 
 import (
-	"log"
 	"strings"
 )
 
@@ -71,7 +70,7 @@ type BasicFileMatch struct {
 func nameInEqualsList(name string, list []string) bool {
 	for _, entry := range list {
 		if strings.EqualFold(name, entry) {
-			log.Printf("Exclude %s with entry %s", name, entry)
+			logger.Printf("Exclude %s with entry %s", name, entry)
 			return true
 		}
 	}
@@ -82,7 +81,7 @@ func nameInEqualsList(name string, list []string) bool {
 func nameInEqualsListCase(name string, list []string) bool {
 	for _, entry := range list {
 		if name == entry {
-			log.Printf("Exclude %s with entry %s", name, entry)
+			logger.Printf("Exclude %s with entry %s", name, entry)
 			return true
 		}
 	}
@@ -95,7 +94,7 @@ func nameInContainsList(name string, list []string) bool {
 		if strings.Contains(
 			strings.ToLower(name),
 			strings.ToLower(entry)) {
-			log.Printf("Exclude %s with entry %s", name, entry)
+			logger.Printf("Exclude %s with entry %s", name, entry)
 			return true
 		}
 	}
@@ -106,7 +105,7 @@ func nameInContainsList(name string, list []string) bool {
 func nameInContainsListCase(name string, list []string) bool {
 	for _, entry := range list {
 		if strings.Contains(name, entry) {
-			log.Printf("Exclude %s with entry %s", name, entry)
+			logger.Printf("Exclude %s with entry %s", name, entry)
 			return true
 		}
 	}
@@ -119,7 +118,7 @@ func nameInExtensionList(name string, list []string) bool {
 		if strings.HasSuffix(
 			strings.ToLower(name),
 			strings.ToLower(entry)) {
-			log.Printf("Exclude %s with entry %s", name, entry)
+			logger.Printf("Exclude %s with entry %s", name, entry)
 			return true
 		}
 	}
@@ -129,7 +128,7 @@ func nameInExtensionList(name string, list []string) bool {
 // TODO: If I ever want to try this in Windows, look into making this portable.
 func nameIsHidden(name string, ignoreHidden bool) bool {
 	if ignoreHidden && name != "." && strings.HasPrefix(name, ".") {
-		log.Printf("Exclude hidden file %s", name)
+		logger.Printf("Exclude hidden file %s", name)
 		return true
 	}
 	return false
@@ -197,17 +196,17 @@ func (l *BasicFileMatch) SkipFileResults() bool {
 
 func matchFileToTypeList(name string, typeList []string) bool {
 	for _, fileType := range typeList {
-		log.Printf("fileType %s\n", fileType)
+		logger.Printf("fileType %s\n", fileType)
 		// Match against full filename first
 		if filenameList, ok := typeListFiles[fileType]; ok {
-			log.Printf("filenameList: %v\n", filenameList)
+			logger.Printf("filenameList: %v\n", filenameList)
 			if nameInEqualsListCase(name, filenameList) {
 				return true
 			}
 		}
 		// Match against ext
 		if extList, ok := typeListExt[fileType]; ok {
-			log.Printf("extList: %v\n", extList)
+			logger.Printf("extList: %v\n", extList)
 			if nameInExtensionList(name, extList) {
 				return true
 			}
