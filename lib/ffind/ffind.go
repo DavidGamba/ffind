@@ -92,10 +92,7 @@ func ReadDirNoSort(dirname string) ([]os.FileInfo, error) {
 }
 
 // ListOneLevel - will return a one level list of FileError results under `path`.
-func ListOneLevel(
-	path string,
-	follow bool,
-	sortFn SortFn) <-chan FileError {
+func ListOneLevel(path string, follow bool, sortFn SortFn) <-chan FileError {
 	// Error gets passed to fe.Error, OK to ignore.
 	fe, _ := NewFileError(path)
 	return listOneLevel(fe, follow, sortFn)

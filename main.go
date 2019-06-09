@@ -102,21 +102,21 @@ func main() {
 	var fileType []string
 	opt := getoptions.New()
 	opt.SetMode("singleDash")
-	opt.Bool("help", false, "?", "h")
+	opt.Bool("help", false, opt.Alias("?"), opt.Alias("h"))
 	opt.Bool("version", false)
 	opt.Bool("debug", false)
 	opt.Bool("verbose", false)
-	opt.Bool("type-list", false, "typelist")
+	opt.Bool("type-list", false, opt.Alias("typelist"))
 	opt.BoolVar(&vcs, "vcs", true)
 	opt.BoolVar(&hidden, "hidden", true)
 	opt.BoolVar(&caseSensitive, "case", false)
 	opt.BoolVar(&follow, "no-follow", true)
 	opt.BoolVar(&abspath, "abs-path", false)
 	opt.BoolVar(&sortNum, "num-sort", false)
-	fileTypeWithFileAndDir := opt.StringSlice("t", 1, 1, "type")
-	noFileType := opt.StringSlice("T", 1, 1, "no-type")
-	matchExtensionList := opt.StringSlice("e", 1, 1, "extension")
-	ignoreExtensionList := opt.StringSlice("E", 1, 1, "no-extension")
+	fileTypeWithFileAndDir := opt.StringSlice("t", 1, 1, opt.Alias("type"))
+	noFileType := opt.StringSlice("T", 1, 1, opt.Alias("no-type"))
+	matchExtensionList := opt.StringSlice("e", 1, 1, opt.Alias("extension"))
+	ignoreExtensionList := opt.StringSlice("E", 1, 1, opt.Alias("no-extension"))
 	remaining, err := opt.Parse(os.Args[1:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
@@ -127,7 +127,7 @@ func main() {
 		os.Exit(1)
 	}
 	if opt.Called("version") {
-		version := semver.Version{Major: 0, Minor: 4, Patch: 0}
+		version := semver.Version{Major: 0, Minor: 6, Patch: 0}
 		fmt.Println(version)
 		os.Exit(1)
 	}

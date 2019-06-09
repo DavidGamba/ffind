@@ -151,6 +151,11 @@ ffind info +'~'+
 
 == ROADMAP
 
+Exclude directory::
+Allow passing directories to exclude recursion on.
+
+Report the initial link that has recursion.
+
 Limit depth option::
 Might need to add this for large projects.
 

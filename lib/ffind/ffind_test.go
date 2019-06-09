@@ -20,6 +20,7 @@ import (
 )
 
 func goToRootDir() {
+	log.SetOutput(os.Stderr)
 	cwd, _ := os.Getwd()
 	log.Printf("CWD: %s", cwd)
 	if strings.HasSuffix(cwd, "lib/ffind") {
@@ -28,6 +29,7 @@ func goToRootDir() {
 	}
 	cwd, _ = os.Getwd()
 	log.Printf("CWD: %s", cwd)
+	log.SetOutput(ioutil.Discard)
 }
 
 func compareTestStringSlices(t *testing.T, expected []string, received []string) {
@@ -223,6 +225,10 @@ var listRecursiveCases = []struct {
 		"test_tree/.A/b",
 		"test_tree/.A/b/C",
 		"test_tree/.A/b/C/d",
+		"test_tree/.A/b/C/d/E",
+	},
+	},
+	{"./test_tree/.A/b/C/d/E", false, false, false, []string{
 		"test_tree/.A/b/C/d/E",
 	},
 	},
