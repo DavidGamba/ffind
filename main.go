@@ -101,7 +101,7 @@ func main() {
 	var sortNum, typeDir, typeFile bool
 	var fileType []string
 	opt := getoptions.New()
-	opt.SetMode("singleDash")
+	opt.SetMode(getoptions.SingleDash)
 	opt.Bool("help", false, opt.Alias("?"), opt.Alias("h"))
 	opt.Bool("version", false)
 	opt.Bool("debug", false)
