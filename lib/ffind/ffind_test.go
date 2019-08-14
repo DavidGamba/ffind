@@ -58,13 +58,13 @@ func TestNewFileError(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 	// log.SetOutput(os.Stderr)
 	goToRootDir()
-	file := "./test_tree"
+	file := "./test_files/test_tree"
 	fe, err := NewFileError(file)
 	if err != nil {
 		t.Fatalf("Unexpected error '%s': %s\n", file, err)
 	}
-	if fe.Path != "test_tree" {
-		t.Fatalf("Paths don't match '%s': %s\n", file, "test_tree")
+	if fe.Path != "test_files/test_tree" {
+		t.Fatalf("Paths don't match '%s': %s\n", file, "test_files/test_tree")
 	}
 	file = "non-existent"
 	fe, err = NewFileError(file)
@@ -86,11 +86,11 @@ func TestEvalSymlink(t *testing.T) {
 		file     string
 		expected string
 	}{
-		{"./test_tree", "test_tree"},
-		{"./test_tree/.A", "test_tree/.A"},
-		{"./test_tree/.A/b/C/d/E", "test_tree/.A/b/C/d/E"},
-		{"./test_tree/slnA", "test_tree/A"},
-		{"./test_tree/slnB", "test_tree/A"},
+		{"./test_files/test_tree", "test_files/test_tree"},
+		{"./test_files/test_tree/.A", "test_files/test_tree/.A"},
+		{"./test_files/test_tree/.A/b/C/d/E", "test_files/test_tree/.A/b/C/d/E"},
+		{"./test_files/test_tree/slnA", "test_files/test_tree/A"},
+		{"./test_files/test_tree/slnB", "test_files/test_tree/A"},
 	}
 	for _, c := range cases {
 		// Read given file information
@@ -102,7 +102,7 @@ func TestEvalSymlink(t *testing.T) {
 			t.Fatalf("Got %s != Expected %s\n", read, c.expected)
 		}
 	}
-	_, err := filepath.EvalSymlinks("./test_tree/slnE")
+	_, err := filepath.EvalSymlinks("./test_files/test_tree/slnE")
 	if err == nil {
 		t.Fatalf("Expected error, none received! \n")
 	}
@@ -120,45 +120,45 @@ func TestListOneLevel(t *testing.T) {
 		follow   bool
 		expected []string
 	}{
-		{"./test_tree", false, []string{
-			"test_tree/.A",
-			"test_tree/.a",
-			"test_tree/.hg",
-			"test_tree/.svn",
-			"test_tree/A",
-			"test_tree/a",
-			"test_tree/slnA",
-			"test_tree/slnB",
-			"test_tree/slnC",
-			"test_tree/slnD",
-			"test_tree/slnE",
-			"test_tree/slnF",
-			"test_tree/slnG",
-			"test_tree/z",
+		{"./test_files/test_tree", false, []string{
+			"test_files/test_tree/.A",
+			"test_files/test_tree/.a",
+			"test_files/test_tree/.hg",
+			"test_files/test_tree/.svn",
+			"test_files/test_tree/A",
+			"test_files/test_tree/a",
+			"test_files/test_tree/slnA",
+			"test_files/test_tree/slnB",
+			"test_files/test_tree/slnC",
+			"test_files/test_tree/slnD",
+			"test_files/test_tree/slnE",
+			"test_files/test_tree/slnF",
+			"test_files/test_tree/slnG",
+			"test_files/test_tree/z",
 		},
 		},
-		{"./test_tree/.A", false, []string{
-			"test_tree/.A/b",
+		{"./test_files/test_tree/.A", false, []string{
+			"test_files/test_tree/.A/b",
 		},
 		},
-		{"./test_tree/.A/b/C/d/E", false, []string{
-			"test_tree/.A/b/C/d/E",
+		{"./test_files/test_tree/.A/b/C/d/E", false, []string{
+			"test_files/test_tree/.A/b/C/d/E",
 		},
 		},
-		{"./test_tree/slnA", false, []string{
-			"test_tree/slnA",
+		{"./test_files/test_tree/slnA", false, []string{
+			"test_files/test_tree/slnA",
 		},
 		},
-		{"./test_tree/slnA", true, []string{
-			"test_tree/slnA/b",
+		{"./test_files/test_tree/slnA", true, []string{
+			"test_files/test_tree/slnA/b",
 		},
 		},
-		{"./test_tree/slnB", false, []string{
-			"test_tree/slnB",
+		{"./test_files/test_tree/slnB", false, []string{
+			"test_files/test_tree/slnB",
 		},
 		},
-		{"./test_tree/slnB", true, []string{
-			"test_tree/slnB/b",
+		{"./test_files/test_tree/slnB", true, []string{
+			"test_files/test_tree/slnB/b",
 		},
 		},
 	}
@@ -173,7 +173,7 @@ func TestListOneLevel(t *testing.T) {
 		}
 		compareTestStringSlices(t, c.expected, tree)
 	}
-	file := "./test_tree/slnE"
+	file := "./test_files/test_tree/slnE"
 	ch := ListOneLevel(file, true, SortFnByName)
 	log.Printf("%d\n", len(ch))
 	for e := range ch {
@@ -221,147 +221,147 @@ var listRecursiveCases = []struct {
 	ignoreCVSDirs     bool
 	expected          []string
 }{
-	{"./test_tree/.A", false, false, false, []string{
-		"test_tree/.A/b",
-		"test_tree/.A/b/C",
-		"test_tree/.A/b/C/d",
-		"test_tree/.A/b/C/d/E",
+	{"./test_files/test_tree/.A", false, false, false, []string{
+		"test_files/test_tree/.A/b",
+		"test_files/test_tree/.A/b/C",
+		"test_files/test_tree/.A/b/C/d",
+		"test_files/test_tree/.A/b/C/d/E",
 	},
 	},
-	{"./test_tree/.A/b/C/d/E", false, false, false, []string{
-		"test_tree/.A/b/C/d/E",
+	{"./test_files/test_tree/.A/b/C/d/E", false, false, false, []string{
+		"test_files/test_tree/.A/b/C/d/E",
 	},
 	},
-	{"./test_tree", false, false, false, []string{
-		"test_tree/.A",
-		"test_tree/.A/b",
-		"test_tree/.A/b/C",
-		"test_tree/.A/b/C/d",
-		"test_tree/.A/b/C/d/E",
-		"test_tree/.a",
-		"test_tree/.a/B",
-		"test_tree/.a/B/c",
-		"test_tree/.a/B/c/D",
-		"test_tree/.a/B/c/D/e",
-		"test_tree/.hg",
-		"test_tree/.hg/E",
-		"test_tree/.hg/e",
-		"test_tree/.svn",
-		"test_tree/.svn/E",
-		"test_tree/.svn/e",
-		"test_tree/A",
-		"test_tree/A/b",
-		"test_tree/A/b/C",
-		"test_tree/A/b/C/d",
-		"test_tree/A/b/C/d/E",
-		"test_tree/a",
-		"test_tree/a/B",
-		"test_tree/a/B/c",
-		"test_tree/a/B/c/D",
-		"test_tree/a/B/c/D/e",
-		"test_tree/slnA",
-		"test_tree/slnA/b",
-		"test_tree/slnA/b/C",
-		"test_tree/slnA/b/C/d",
-		"test_tree/slnA/b/C/d/E",
-		"test_tree/slnB",
-		"test_tree/slnB/b",
-		"test_tree/slnB/b/C",
-		"test_tree/slnB/b/C/d",
-		"test_tree/slnB/b/C/d/E",
-		"test_tree/slnC",
-		"test_tree/slnD",
-		"test_tree/slnE",
-		"test_tree/slnF",
-		"test_tree/slnG",
-		"test_tree/z",
+	{"./test_files/test_tree", false, false, false, []string{
+		"test_files/test_tree/.A",
+		"test_files/test_tree/.A/b",
+		"test_files/test_tree/.A/b/C",
+		"test_files/test_tree/.A/b/C/d",
+		"test_files/test_tree/.A/b/C/d/E",
+		"test_files/test_tree/.a",
+		"test_files/test_tree/.a/B",
+		"test_files/test_tree/.a/B/c",
+		"test_files/test_tree/.a/B/c/D",
+		"test_files/test_tree/.a/B/c/D/e",
+		"test_files/test_tree/.hg",
+		"test_files/test_tree/.hg/E",
+		"test_files/test_tree/.hg/e",
+		"test_files/test_tree/.svn",
+		"test_files/test_tree/.svn/E",
+		"test_files/test_tree/.svn/e",
+		"test_files/test_tree/A",
+		"test_files/test_tree/A/b",
+		"test_files/test_tree/A/b/C",
+		"test_files/test_tree/A/b/C/d",
+		"test_files/test_tree/A/b/C/d/E",
+		"test_files/test_tree/a",
+		"test_files/test_tree/a/B",
+		"test_files/test_tree/a/B/c",
+		"test_files/test_tree/a/B/c/D",
+		"test_files/test_tree/a/B/c/D/e",
+		"test_files/test_tree/slnA",
+		"test_files/test_tree/slnA/b",
+		"test_files/test_tree/slnA/b/C",
+		"test_files/test_tree/slnA/b/C/d",
+		"test_files/test_tree/slnA/b/C/d/E",
+		"test_files/test_tree/slnB",
+		"test_files/test_tree/slnB/b",
+		"test_files/test_tree/slnB/b/C",
+		"test_files/test_tree/slnB/b/C/d",
+		"test_files/test_tree/slnB/b/C/d/E",
+		"test_files/test_tree/slnC",
+		"test_files/test_tree/slnD",
+		"test_files/test_tree/slnE",
+		"test_files/test_tree/slnF",
+		"test_files/test_tree/slnG",
+		"test_files/test_tree/z",
 	},
 	},
-	{"./test_tree", true, false, false, []string{
-		"test_tree/.A/b/C/d/E",
-		"test_tree/.a/B/c/D/e",
-		"test_tree/.hg/E",
-		"test_tree/.hg/e",
-		"test_tree/.svn/E",
-		"test_tree/.svn/e",
-		"test_tree/A/b/C/d/E",
-		"test_tree/a/B/c/D/e",
-		"test_tree/slnA/b/C/d/E",
-		"test_tree/slnB/b/C/d/E",
-		"test_tree/slnC",
-		"test_tree/slnD",
-		"test_tree/slnE",
-		"test_tree/slnF",
-		"test_tree/slnG",
-		"test_tree/z",
+	{"./test_files/test_tree", true, false, false, []string{
+		"test_files/test_tree/.A/b/C/d/E",
+		"test_files/test_tree/.a/B/c/D/e",
+		"test_files/test_tree/.hg/E",
+		"test_files/test_tree/.hg/e",
+		"test_files/test_tree/.svn/E",
+		"test_files/test_tree/.svn/e",
+		"test_files/test_tree/A/b/C/d/E",
+		"test_files/test_tree/a/B/c/D/e",
+		"test_files/test_tree/slnA/b/C/d/E",
+		"test_files/test_tree/slnB/b/C/d/E",
+		"test_files/test_tree/slnC",
+		"test_files/test_tree/slnD",
+		"test_files/test_tree/slnE",
+		"test_files/test_tree/slnF",
+		"test_files/test_tree/slnG",
+		"test_files/test_tree/z",
 	},
 	},
-	{"./test_tree", false, true, false, []string{
-		"test_tree/.A",
-		"test_tree/.A/b",
-		"test_tree/.A/b/C",
-		"test_tree/.A/b/C/d",
-		"test_tree/.a",
-		"test_tree/.a/B",
-		"test_tree/.a/B/c",
-		"test_tree/.a/B/c/D",
-		"test_tree/.hg",
-		"test_tree/.svn",
-		"test_tree/A",
-		"test_tree/A/b",
-		"test_tree/A/b/C",
-		"test_tree/A/b/C/d",
-		"test_tree/a",
-		"test_tree/a/B",
-		"test_tree/a/B/c",
-		"test_tree/a/B/c/D",
-		"test_tree/slnA",
-		"test_tree/slnA/b",
-		"test_tree/slnA/b/C",
-		"test_tree/slnA/b/C/d",
-		"test_tree/slnB",
-		"test_tree/slnB/b",
-		"test_tree/slnB/b/C",
-		"test_tree/slnB/b/C/d",
+	{"./test_files/test_tree", false, true, false, []string{
+		"test_files/test_tree/.A",
+		"test_files/test_tree/.A/b",
+		"test_files/test_tree/.A/b/C",
+		"test_files/test_tree/.A/b/C/d",
+		"test_files/test_tree/.a",
+		"test_files/test_tree/.a/B",
+		"test_files/test_tree/.a/B/c",
+		"test_files/test_tree/.a/B/c/D",
+		"test_files/test_tree/.hg",
+		"test_files/test_tree/.svn",
+		"test_files/test_tree/A",
+		"test_files/test_tree/A/b",
+		"test_files/test_tree/A/b/C",
+		"test_files/test_tree/A/b/C/d",
+		"test_files/test_tree/a",
+		"test_files/test_tree/a/B",
+		"test_files/test_tree/a/B/c",
+		"test_files/test_tree/a/B/c/D",
+		"test_files/test_tree/slnA",
+		"test_files/test_tree/slnA/b",
+		"test_files/test_tree/slnA/b/C",
+		"test_files/test_tree/slnA/b/C/d",
+		"test_files/test_tree/slnB",
+		"test_files/test_tree/slnB/b",
+		"test_files/test_tree/slnB/b/C",
+		"test_files/test_tree/slnB/b/C/d",
 	},
 	},
-	{"./test_tree", false, false, true, []string{
-		"test_tree/.A",
-		"test_tree/.A/b",
-		"test_tree/.A/b/C",
-		"test_tree/.A/b/C/d",
-		"test_tree/.A/b/C/d/E",
-		"test_tree/.a",
-		"test_tree/.a/B",
-		"test_tree/.a/B/c",
-		"test_tree/.a/B/c/D",
-		"test_tree/.a/B/c/D/e",
-		"test_tree/A",
-		"test_tree/A/b",
-		"test_tree/A/b/C",
-		"test_tree/A/b/C/d",
-		"test_tree/A/b/C/d/E",
-		"test_tree/a",
-		"test_tree/a/B",
-		"test_tree/a/B/c",
-		"test_tree/a/B/c/D",
-		"test_tree/a/B/c/D/e",
-		"test_tree/slnA",
-		"test_tree/slnA/b",
-		"test_tree/slnA/b/C",
-		"test_tree/slnA/b/C/d",
-		"test_tree/slnA/b/C/d/E",
-		"test_tree/slnB",
-		"test_tree/slnB/b",
-		"test_tree/slnB/b/C",
-		"test_tree/slnB/b/C/d",
-		"test_tree/slnB/b/C/d/E",
-		"test_tree/slnC",
-		"test_tree/slnD",
-		"test_tree/slnE",
-		"test_tree/slnF",
-		"test_tree/slnG",
-		"test_tree/z",
+	{"./test_files/test_tree", false, false, true, []string{
+		"test_files/test_tree/.A",
+		"test_files/test_tree/.A/b",
+		"test_files/test_tree/.A/b/C",
+		"test_files/test_tree/.A/b/C/d",
+		"test_files/test_tree/.A/b/C/d/E",
+		"test_files/test_tree/.a",
+		"test_files/test_tree/.a/B",
+		"test_files/test_tree/.a/B/c",
+		"test_files/test_tree/.a/B/c/D",
+		"test_files/test_tree/.a/B/c/D/e",
+		"test_files/test_tree/A",
+		"test_files/test_tree/A/b",
+		"test_files/test_tree/A/b/C",
+		"test_files/test_tree/A/b/C/d",
+		"test_files/test_tree/A/b/C/d/E",
+		"test_files/test_tree/a",
+		"test_files/test_tree/a/B",
+		"test_files/test_tree/a/B/c",
+		"test_files/test_tree/a/B/c/D",
+		"test_files/test_tree/a/B/c/D/e",
+		"test_files/test_tree/slnA",
+		"test_files/test_tree/slnA/b",
+		"test_files/test_tree/slnA/b/C",
+		"test_files/test_tree/slnA/b/C/d",
+		"test_files/test_tree/slnA/b/C/d/E",
+		"test_files/test_tree/slnB",
+		"test_files/test_tree/slnB/b",
+		"test_files/test_tree/slnB/b/C",
+		"test_files/test_tree/slnB/b/C/d",
+		"test_files/test_tree/slnB/b/C/d/E",
+		"test_files/test_tree/slnC",
+		"test_files/test_tree/slnD",
+		"test_files/test_tree/slnE",
+		"test_files/test_tree/slnF",
+		"test_files/test_tree/slnG",
+		"test_files/test_tree/z",
 	},
 	},
 }
@@ -422,7 +422,7 @@ func TestListRecursive(t *testing.T) {
 			t.Errorf("Expected IsNotExist error, received: %s\n", e.Error)
 		}
 	}
-	file = "test_files"
+	file = "test_files/test_files"
 	ch = ListRecursive(
 		file,
 		false,
@@ -437,5 +437,5 @@ func TestListRecursive(t *testing.T) {
 		}
 		tree = append(tree, e.Path)
 	}
-	compareTestStringSlices(t, []string{"test_files/file.rb"}, tree)
+	compareTestStringSlices(t, []string{"test_files/test_files/file.rb"}, tree)
 }
